@@ -365,8 +365,9 @@ export function expandKeywords(text: string, fnStart = 1): string {
 					if (/^\/\/TABLE/i.test(rowLine)) { i++; break; }
 					// Qualsiasi altra keyword chiude implicitamente senza consumarla
 					if (/^\/\//.test(rowLine)) break;
-					// Fine implicita: riga vuota
-					if (!rowLine) { i++; continue; } // riga vuota: salta (Gemini le inserisce tra header e dati)
+					// Riga vuota: salta se non abbiamo ancora dati (Gemini le inserisce tra header e prima riga),
+					// termina la table se almeno una riga dati è già stata raccolta.
+					if (!rowLine) { if (rows.length > 0) break; i++; continue; }
 					// Ogni riga fisica è una riga della tabella — nessun merge automatico.
 					// Celle vuote intermedie (es. "val1,,val3") vengono preservate.
 					// Celle vuote in coda vengono rimosse (buildTable padda al numero di colonne).
