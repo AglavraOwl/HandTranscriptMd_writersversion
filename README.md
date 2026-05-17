@@ -1,4 +1,4 @@
-# Handwriting to Markdown — Obsidian Plugin
+# HandTranscriptMd
 
 Convert handwritten notes (drawn with a stylus on a canvas) into structured Markdown, directly inside Obsidian. Works on both Windows (desktop) and Android (mobile with stylus).
 

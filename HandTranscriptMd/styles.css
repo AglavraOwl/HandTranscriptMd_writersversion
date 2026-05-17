@@ -27,8 +27,12 @@
 	transition: none !important;
 }
 
-/* Animazione altezza del wrapper clip (collapse/expand nuovo formato) */
+/* Wrapper clip (collapse/expand nuovo formato).
+   Animiamo solo il wrapper, non il container span, così il ResizeObserver
+   di Obsidian Mobile non si attiva e non re-imposta le dimensioni dell'img. */
 .hwm_clip-wrapper {
+	width: 100%;
+	background: transparent;
 	transition: height 0.3s ease;
 }
 .hwm_clip-animating {
@@ -67,17 +71,17 @@
 .hwm-handwriting-mode .hwm-badge-mode {
 	/* Larghezza piena: lo span .internal-embed di default può restare stretto
 	   quanto l'immagine — forziamo 100% per contenere correttamente il pannello portale */
-	width: 100% !important;
-	box-sizing: border-box !important;
+	width: 100%;
+	box-sizing: border-box;
 	/* Altezza fissa: abbastanza alta da contenere il pannello portale (~34px)
 	   senza occupare troppo spazio nel documento */
-	height: 72px !important;
-	max-height: 72px !important;
-	min-height: 72px !important;
+	height: 72px;
+	max-height: 72px;
+	min-height: 72px;
 	overflow: hidden;
 	cursor: default;
 	/* Flex per centrare l'icona */
-	display: flex !important;
+	display: flex;
 	align-items: center;
 	justify-content: center;
 	background: var(--background-secondary, #f0f0f0);
@@ -85,7 +89,7 @@
 }
 /* Nasconde l'SVG: mostriamo solo il box con l'icona */
 .hwm-handwriting-mode .hwm-badge-mode img {
-	display: none !important;
+	display: none;
 }
 /* Icona matita centrata via pseudo-elemento */
 .hwm-handwriting-mode .hwm-badge-mode::after {
@@ -164,7 +168,7 @@
 	border: none;
 	border-radius: var(--radius-s);
 	background: transparent;
-	color: #666;
+	color: #666666;
 	cursor: pointer;
 	line-height: 0;
 	/* Spacing via margin-right invece di gap, così i bottoni nascosti
@@ -185,7 +189,7 @@
 }
 .hwm_btn:hover {
 	background: #e0e0e0;
-	color: #333;
+	color: #333333;
 }
 /* Bottone attivo (tool selezionato) */
 .hwm_btn.hwm_active {
@@ -218,25 +222,27 @@
 /* I pallini colore sono <div> (non <button>) per evitare che Obsidian Mobile
    sovrascriva width/height con i propri stili globali sui button.
    Il colore sfondo è impostato via setCssProps --hwm-btn-color.
-   Le dimensioni forzate con !important per resistere agli override di Obsidian Mobile. */
-.hwm_color-btn {
+   Specificità 0,2,0 (.hwm_toolbar .hwm_color-btn) resiste agli override di Obsidian Mobile. */
+.hwm_toolbar .hwm_color-btn {
 	display: inline-block;
-	width: 22px !important;
-	height: 22px !important;
-	min-width: 22px !important;
-	min-height: 22px !important;
+	width: 22px;
+	height: 22px;
+	min-width: 22px;
+	min-height: 22px;
 	border: 2px solid transparent;
-	border-radius: 50% !important;
+	border-radius: 50%;
 	cursor: pointer;
-	box-sizing: border-box !important;
+	box-sizing: border-box;
 	flex-shrink: 0;
 	background-color: var(--hwm-btn-color, transparent);
+	transition: max-width 0.2s ease, opacity 0.2s ease,
+	            margin 0.2s ease, padding 0.2s ease;
 }
 .hwm_color-btn.hwm_active {
 	border-color: var(--interactive-accent);
 }
 .hwm_color-btn:hover {
-	border-color: #999;
+	border-color: #999999;
 }
 
 /* --- Area canvas (editing) --- */
@@ -257,7 +263,7 @@
 	/* Sfondo bianco fisso */
 	background: #ffffff;
 	/* Previene scroll/zoom del browser durante il disegno con pennino/dito */
-	touch-action: none !important;
+	touch-action: none;
 }
 
 /* --- Handle di resize in basso --- */
@@ -270,40 +276,25 @@
 	cursor: ns-resize;
 	background: #f5f5f5;
 	border-top: 1px solid #e0e0e0;
-	color: #999;
+	color: #999999;
 	font-size: 14px;
 	user-select: none;
 	touch-action: none;
 }
 .hwm_resize-handle:hover {
 	background: #ebebeb;
-	color: #666;
+	color: #666666;
 }
 .hwm_resize-handle--dark {
 	background: #2a2a2a;
-	border-top-color: #444;
-	color: #888;
+	border-top-color: #444444;
+	color: #888888;
 }
 .hwm_resize-handle--dark:hover {
-	background: #333;
-	color: #aaa;
+	background: #333333;
+	color: #aaaaaa;
 }
 
-/* --- Pannello portale floating (document.body, position:fixed) --- */
-/* Stile chiaro (come la toolbar) — i bottoni .hwm_btn usano i loro colori di default */
-.hwm_portal-panel {
-	position: fixed;
-	z-index: 1000;
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	gap: 0; /* spacing via margin-right sui .hwm_btn */
-	padding: 3px 6px;
-	background: rgba(240, 240, 240, 0.95);
-	border-radius: 6px;
-	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
-	pointer-events: all;
-}
 
 /* --- Modal wiki editor --- */
 .hwm_wiki-modal-content {
@@ -318,8 +309,8 @@
 
 /* --- SVG collassato (bottone ↕) --- */
 .hwm-collapsed {
-	max-height: 48px !important;
-	overflow: hidden !important;
+	max-height: 48px;
+	overflow: hidden;
 }
 
 /* --- Preview mode --- */
@@ -335,15 +326,15 @@
 	height: auto;
 }
 /* Bottone matita sovrapposto in alto a destra sulla preview */
-.hwm_pencil-btn {
+.hwm_preview-wrap .hwm_pencil-btn {
 	position: absolute;
 	top: 8px;
 	right: 8px;
-	width: 32px !important;
-	height: 32px !important;
-	background: rgba(0, 0, 0, 0.45) !important;
-	border-radius: 6px !important;
-	color: #fff !important;
+	width: 32px;
+	height: 32px;
+	background: rgba(0, 0, 0, 0.45);
+	border-radius: 6px;
+	color: #ffffff;
 	opacity: 0;
 	transition: opacity 0.15s;
 }
@@ -352,13 +343,13 @@
 }
 /* Su mobile il bottone è sempre visibile (no hover) */
 .hwm_mobile .hwm_pencil-btn {
-	opacity: 1 !important;
+	opacity: 1;
 }
 
 /* --- Placeholder per canvas vuoto --- */
 .hwm_placeholder {
 	text-align: center;
-	color: #999;
+	color: #999999;
 	padding: 40px 0;
 	font-style: italic;
 }
@@ -382,11 +373,6 @@
 	            margin 0.2s ease, padding 0.2s ease;
 }
 
-/* --- Pallini colore: transizione per animazione toolbar --- */
-.hwm_color-btn {
-	transition: max-width 0.2s ease, opacity 0.2s ease,
-	            margin 0.2s ease, padding 0.2s ease;
-}
 
 /* --- Toolbar compatta (mobile) ---
    Bottoni nascosti: collassati a larghezza 0 con fade-out.
@@ -398,10 +384,10 @@
 .hwm_toolbar--compact .hwm_save-btn,
 .hwm_toolbar--compact .hwm_color-btn:not(.hwm_active),
 .hwm_toolbar--compact .hwm_separator {
-	max-width: 0 !important;
-	opacity: 0 !important;
-	padding: 0 !important;
-	margin: 0 !important;
+	max-width: 0;
+	opacity: 0;
+	padding: 0;
+	margin: 0;
 	pointer-events: none;
 }
 /* Riduce il margine attorno al pallino colore rimasto e azzera il gap
@@ -414,22 +400,22 @@
 /* --- Tema scuro per la toolbar ---
    Applicato via classe hwm_toolbar--dark quando bgMode === 'dark' */
 .hwm_toolbar--dark {
-	background: rgba(40, 40, 40, 0.97) !important;
-	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4) !important;
+	background: rgba(40, 40, 40, 0.97);
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 .hwm_toolbar--dark .hwm_btn {
-	color: #bbb !important;
+	color: #bbbbbb;
 }
 .hwm_toolbar--dark .hwm_btn:hover {
-	background: rgba(255, 255, 255, 0.12) !important;
-	color: #fff !important;
+	background: rgba(255, 255, 255, 0.12);
+	color: #ffffff;
 }
 .hwm_toolbar--dark .hwm_btn.hwm_active {
-	background: var(--interactive-accent) !important;
-	color: #fff !important;
+	background: var(--interactive-accent);
+	color: #ffffff;
 }
 .hwm_toolbar--dark .hwm_separator {
-	background: #555 !important;
+	background: #555555;
 }
 
 /* --- Mobile: bottoni grandi e visibili ---
@@ -440,31 +426,31 @@
 	padding: 5px 8px;
 }
 .hwm_mobile .hwm_toolbar .hwm_btn {
-	width: 36px !important;
-	height: 36px !important;
-	margin-right: 6px !important; /* spacing via margin, non gap */
-	background: rgba(245, 245, 245, 0.98) !important;
-	border: 1px solid rgba(0, 0, 0, 0.18) !important;
-	border-radius: var(--radius-m) !important;
-	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18) !important;
-	color: #222 !important;
+	width: 36px;
+	height: 36px;
+	margin-right: 6px; /* spacing via margin, non gap */
+	background: rgba(245, 245, 245, 0.98);
+	border: 1px solid rgba(0, 0, 0, 0.18);
+	border-radius: var(--radius-m);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+	color: #222222;
 }
 .hwm_mobile .hwm_toolbar .hwm_btn.hwm_active {
-	background: var(--interactive-accent) !important;
-	border-color: var(--interactive-accent) !important;
-	color: #ffffff !important;
+	background: var(--interactive-accent);
+	border-color: var(--interactive-accent);
+	color: #ffffff;
 }
 
-/* --- Tema scuro su mobile: sovrascrive i bianchi !important del mobile --- */
+/* --- Tema scuro su mobile: sovrascrive gli stili light del mobile --- */
 .hwm_mobile .hwm_toolbar--dark .hwm_btn {
-	background: rgba(55, 55, 55, 0.98) !important;
-	border-color: rgba(255, 255, 255, 0.15) !important;
-	color: #ddd !important;
+	background: rgba(55, 55, 55, 0.98);
+	border-color: rgba(255, 255, 255, 0.15);
+	color: #dddddd;
 }
 .hwm_mobile .hwm_toolbar--dark .hwm_btn.hwm_active {
-	background: var(--interactive-accent) !important;
-	border-color: var(--interactive-accent) !important;
-	color: #fff !important;
+	background: var(--interactive-accent);
+	border-color: var(--interactive-accent);
+	color: #ffffff;
 }
 
 /* ========================================
@@ -490,11 +476,11 @@
 	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 .hwm_inline-buttons--dark .hwm_btn {
-	color: #bbb;
+	color: #bbbbbb;
 }
 .hwm_inline-buttons--dark .hwm_btn:hover {
 	background: rgba(255, 255, 255, 0.12);
-	color: #fff;
+	color: #ffffff;
 }
 
 /* --- Bottone comprimi: rotazione 180° quando compresso --- */
@@ -567,11 +553,11 @@
 	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 .hwm_portal-panel--dark .hwm_btn {
-	color: #bbb !important;
+	color: #bbbbbb;
 }
 .hwm_portal-panel--dark .hwm_btn:hover {
-	background: rgba(255, 255, 255, 0.12) !important;
-	color: #fff !important;
+	background: rgba(255, 255, 255, 0.12);
+	color: #ffffff;
 }
 
 /* Bottone cerchio singolo (formato legacy) */
@@ -614,14 +600,14 @@
    DRAWING MODAL — Editor come overlay
    ======================================== */
 
-.hwm_modal {
-	width: 95vw !important;
-	max-width: 95vw !important;
+.modal-container .hwm_modal {
+	width: 95vw;
+	max-width: 95vw;
 	height: 90vh;
 	display: flex;
 	flex-direction: column;
-	border-radius: var(--radius-l) !important;
-	overflow: hidden !important;
+	border-radius: var(--radius-l);
+	overflow: hidden;
 }
 .hwm_modal .modal-content {
 	flex: 1;
@@ -646,48 +632,55 @@
 }
 
 /* --- Top bar: ← a sinistra | toolbar a destra --- */
+/* Layout a 0,1,0: .hwm_editor-topbar--modal (0,1,0, viene dopo) può
+   sovrascrivere justify-content: center perché stessa specificità + ordine CSS. */
 .hwm_editor-topbar {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	padding: 6px 8px;
-	background: rgba(240, 240, 240, 0.95) !important; /* !important: impedisce a Obsidian dark mode di sovrascrivere il topbar */
-	border-bottom: 1px solid #ddd !important;
 	flex-shrink: 0;
 	gap: 8px;
 }
-.hwm_editor-topbar--dark {
-	background: rgba(40, 40, 40, 0.97) !important;
-	border-bottom-color: #444 !important;
+/* Sfondo/bordo a 0,2,0: batte le regole dark-mode di Obsidian (0,1,0..0,1,1).
+   Funziona sia in DrawingEditorView (dentro .workspace) che in
+   DrawingModal (dentro .modal-container): entrambi aggiungono
+   hwm_editor-view al contentEl prima di buildEditorUI. */
+.hwm_editor-view .hwm_editor-topbar {
+	background: rgba(240, 240, 240, 0.95);
+	border-bottom: 1px solid #dddddd;
+}
+.hwm_editor-view .hwm_editor-topbar--dark {
+	background: rgba(40, 40, 40, 0.97);
+	border-bottom-color: #444444;
 }
 
-/* Forza background e colore icone dentro il topbar dell'editor.
-   Obsidian dark theme ha regole tipo ".modal-content button { background: var(...) }"
-   con specificità 0,1,1 > 0,1,0 di .hwm_btn: senza !important qui sotto, i bottoni
-   rimangono scuri anche in light mode. Le due regole .hwm_btn e --dark .hwm_btn hanno
-   stessa specificità (0,2,0) ma --dark appare dopo → vince in dark mode. */
+/* Background e colore icone dentro il topbar dell'editor.
+   Specificità 0,2,0 (.hwm_editor-topbar .hwm_btn) batte Obsidian 0,1,1 (.modal-content button).
+   Le due regole .hwm_btn e --dark .hwm_btn hanno stessa specificità (0,2,0)
+   ma --dark appare dopo → vince in dark mode. */
 .hwm_editor-topbar .hwm_btn {
-	background: transparent !important;
-	color: #333 !important;
+	background: transparent;
+	color: #333333;
 }
 .hwm_editor-topbar--dark .hwm_btn {
-	background: transparent !important;
-	color: #bbb !important;
+	background: transparent;
+	color: #bbbbbb;
 }
 /* Hover light: sfondo grigio chiaro */
 .hwm_editor-topbar .hwm_btn:hover:not(.hwm_active) {
-	background: #e0e0e0 !important;
-	color: #333 !important;
+	background: #e0e0e0;
+	color: #333333;
 }
 /* Hover dark: sfondo bianco semi-trasparente */
 .hwm_editor-topbar--dark .hwm_btn:hover:not(.hwm_active) {
-	background: rgba(255, 255, 255, 0.12) !important;
-	color: #fff !important;
+	background: rgba(255, 255, 255, 0.12);
+	color: #ffffff;
 }
 /* Bottone attivo (tool selezionato): sempre sfondo accent e icona bianca */
 .hwm_editor-topbar .hwm_btn.hwm_active {
-	background: var(--interactive-accent) !important;
-	color: #ffffff !important;
+	background: var(--interactive-accent);
+	color: #ffffff;
 }
 
 /* Bottone ← (indietro, a sinistra) */
@@ -695,14 +688,15 @@
 	flex-shrink: 0;
 }
 
-/* Toolbar dentro l'editor view: posizione statica, allineata a destra */
-.hwm_editor-toolbar {
-	position: static !important;
-	top: auto !important;
-	right: auto !important;
-	box-shadow: none !important;
-	background: transparent !important;
-	padding: 0 !important;
+/* Toolbar dentro l'editor view: posizione statica, allineata a destra.
+   .hwm_editor-topbar .hwm_editor-toolbar (0,2,0) > .hwm_toolbar (0,1,0) */
+.hwm_editor-topbar .hwm_editor-toolbar {
+	position: static;
+	top: auto;
+	right: auto;
+	box-shadow: none;
+	background: transparent;
+	padding: 0;
 }
 
 /* Topbar centrata: usata sia nel DrawingModal (Windows) che in DrawingEditorView (Android).
@@ -713,8 +707,8 @@
 }
 
 /* Bottone X chiudi: ancorato al bordo destro del topbar, indipendente dal toolbar centrato */
-.hwm_close-btn {
-	position: absolute !important;
+.hwm_editor-topbar--modal .hwm_close-btn {
+	position: absolute;
 	right: 8px;
 	top: 50%;
 	transform: translateY(-50%);
@@ -742,7 +736,7 @@
 	pointer-events: auto !important;
 }
 .hwm_confirm-msg {
-	color: #fff;
+	color: #ffffff;
 	font-size: 14px;
 }
 
@@ -767,7 +761,7 @@
 	width: 36px;
 	height: 36px;
 	border: 3px solid rgba(255, 255, 255, 0.25);
-	border-top-color: #fff;
+	border-top-color: #ffffff;
 	border-radius: 50%;
 	animation: hwm_spin 0.75s linear infinite;
 }
@@ -776,7 +770,7 @@
 }
 /* Messaggio di errore mostrato al posto dello spinner */
 .hwm_convert-error-msg {
-	color: #fff;
+	color: #ffffff;
 	font-size: 13px;
 	text-align: center;
 	max-width: 80%;
@@ -795,24 +789,17 @@
 	border-radius: 0;
 }
 
-/* Wrapper per il collapse: contiene l'<img> e gestisce il clip.
-   Animiamo solo il wrapper, non il container span, così il ResizeObserver
-   di Obsidian Mobile non si attiva e non re-imposta le dimensioni dell'img. */
-.hwm_clip-wrapper {
-	width: 100%;
-	background: transparent !important;
-	transition: height 0.3s ease;
-}
 /* L'img dentro il wrapper non deve mai rimpicciolirsi: occupa la larghezza
-   piena e la sua altezza naturale, poi il wrapper la clippa dall'alto */
-.hwm_clip-wrapper img {
-	display: block !important;
-	width: 100% !important;
-	height: auto !important;
-	max-height: none !important;
-	min-height: 0 !important;
-	object-fit: unset !important;
-	background: transparent !important;
+   piena e la sua altezza naturale, poi il wrapper la clippa dall'alto.
+   .workspace .hwm_clip-wrapper img (0,2,1) > regole img di Obsidian (≤0,1,1) */
+.workspace .hwm_clip-wrapper img {
+	display: block;
+	width: 100%;
+	height: auto;
+	max-height: none;
+	min-height: 0;
+	object-fit: unset;
+	background: transparent;
 }
 
 /* --- Suggest SVG reference: thumbnail + nome file --- */
