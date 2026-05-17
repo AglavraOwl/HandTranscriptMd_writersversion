@@ -10,7 +10,7 @@
 import { requestUrl } from 'obsidian';
 
 // Modello Gemini da usare per il riconoscimento visivo
-const GEMINI_MODEL = 'gemini-3.1-flash-lite-preview';
+const GEMINI_MODEL = 'gemini-3.1-flash-lite';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 // Tipo della risposta JSON di Gemini (solo i campi che ci servono)
