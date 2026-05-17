@@ -360,7 +360,7 @@ export function expandKeywords(text: string, fnStart = 1): string {
 				const rows: string[][] = [];
 				i = startI;
 				while (i < lines.length) {
-					let rowLine = lines[i].trim();
+					const rowLine = lines[i].trim();
 					// Chiusura esplicita //TABLE
 					if (/^\/\/TABLE/i.test(rowLine)) { i++; break; }
 					// Qualsiasi altra keyword chiude implicitamente senza consumarla

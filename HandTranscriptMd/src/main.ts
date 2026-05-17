@@ -56,7 +56,7 @@ export default class HandwritingPlugin extends Plugin {
 		const themeObserver = new MutationObserver(() => {
 			if (this.settings.bgMode === 'auto') this.notifyBgModeChange();
 		});
-		themeObserver.observe(document.body, { attributeFilter: ['class'] });
+		themeObserver.observe(activeDocument.body, { attributeFilter: ['class'] });
 		this.register(() => themeObserver.disconnect());
 
 		// Registra la vista editor (tab dedicata per il disegno)

@@ -216,10 +216,7 @@ async function buildEditorUI(opts: {
 	opts.afterCanvas(canvas, scrollWrap, canvasWidth);
 
 	// Resize handle (visibile ma non interattivo)
-	// NOTA: handle è dichiarato dopo colorBtns ma catturato dal bgModeListener per closure:
-	// la closure legge il valore corrente di 'handle' quando viene invocata (non quando è definita).
-	let handle!: HTMLElement;
-	handle = scrollWrap.createDiv({ cls: 'hwm_resize-handle hwm_resize-handle--disabled' });
+	const handle = scrollWrap.createDiv({ cls: 'hwm_resize-handle hwm_resize-handle--disabled' });
 	handle.createEl('span', { text: '⋯' });
 	handle.classList.toggle('hwm_resize-handle--dark', isDark);
 
@@ -331,7 +328,7 @@ export class DrawingEditorView extends ItemView {
 			this.canvas.destroy();
 			this.canvas = null;
 		}
-		if (this.saveTimer) clearTimeout(this.saveTimer);
+		if (this.saveTimer) window.clearTimeout(this.saveTimer);
 		// Deregistra il listener bgMode
 		if (this.bgModeListener) {
 			this.plugin.bgModeListeners.delete(this.bgModeListener);
@@ -379,8 +376,8 @@ export class DrawingEditorView extends ItemView {
 
 		// Auto-save debounced (2s dopo l'ultimo cambiamento)
 		canvas.onChange(() => {
-			if (this.saveTimer) clearTimeout(this.saveTimer);
-			this.saveTimer = setTimeout(() => { void this.saveSvg(); }, 2000);
+			if (this.saveTimer) window.clearTimeout(this.saveTimer);
+			this.saveTimer = window.setTimeout(() => { void this.saveSvg(); }, 2000);
 		});
 	}
 
@@ -485,7 +482,7 @@ export class DrawingModal extends Modal {
 				this.canvas.destroy();
 				this.canvas = null;
 			}
-			if (this.saveTimer) clearTimeout(this.saveTimer);
+			if (this.saveTimer) window.clearTimeout(this.saveTimer);
 			// Deregistra il listener bgMode
 			if (this.bgModeListener) {
 				this.plugin.bgModeListeners.delete(this.bgModeListener);
@@ -510,7 +507,7 @@ export class DrawingModal extends Modal {
 			// Espande il canvas a tutta la larghezza del modal eliminando le bande laterali.
 			// requestAnimationFrame garantisce che il layout del modal sia pronto prima di misurarlo.
 			afterCanvas: (cv, scrollWrap, canvasWidth) => {
-				requestAnimationFrame(() => {
+				window.requestAnimationFrame(() => {
 					const displayW = scrollWrap.clientWidth;
 					if (displayW > canvasWidth) cv.setDisplayWidth(displayW);
 				});
@@ -525,8 +522,8 @@ export class DrawingModal extends Modal {
 
 		// Auto-save debounced (2s dopo l'ultimo cambiamento)
 		canvas.onChange(() => {
-			if (this.saveTimer) clearTimeout(this.saveTimer);
-			this.saveTimer = setTimeout(() => { void this.saveSvg(); }, 2000);
+			if (this.saveTimer) window.clearTimeout(this.saveTimer);
+			this.saveTimer = window.setTimeout(() => { void this.saveSvg(); }, 2000);
 		});
 	}
 
@@ -591,7 +588,7 @@ export class DrawingModal extends Modal {
 		const doFocus = () => {
 			if (focusDone) return;
 			focusDone = true;
-			setTimeout(() => {
+			window.setTimeout(() => {
 				let mdView = ws.getActiveViewOfType(MarkdownView);
 				if (!mdView || mdView.file?.path !== srcPath) {
 					const leaf = ws.getLeavesOfType('markdown')
@@ -618,7 +615,7 @@ export class DrawingModal extends Modal {
 		if (svgFile instanceof TFile) await this.app.fileManager.trashFile(svgFile);
 
 		// Fallback: se vault.modify non spara entro 3s (caso anomalo), forza comunque il focus
-		setTimeout(() => { this.app.vault.offref(ref); doFocus(); }, 3000);
+		window.setTimeout(() => { this.app.vault.offref(ref); doFocus(); }, 3000);
 
 		this.close();
 		new Notice(t('notice_deleted'));

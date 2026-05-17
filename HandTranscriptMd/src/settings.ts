@@ -34,7 +34,7 @@ export const LINE_COLORS: Record<'light' | 'dark', string> = {
 
 // Risolve 'auto' al tema effettivo leggendo la classe Obsidian sul body
 function resolveAutoMode(): 'light' | 'dark' {
-	return document.body.classList.contains('theme-dark') ? 'dark' : 'light';
+	return activeDocument.body.classList.contains('theme-dark') ? 'dark' : 'light';
 }
 
 // Ritorna il colore sfondo effettivo in base alle impostazioni
@@ -58,7 +58,7 @@ export const DARK_COLORS  = ['#ffffff', '#60a5fa', '#f87171', '#4ade80'];
 
 // Risolve se il tema è scuro tenendo conto di 'auto' (legge la classe Obsidian sul body)
 export function resolveIsDark(bgMode: string): boolean {
-	if (bgMode === 'auto') return document.body.classList.contains('theme-dark');
+	if (bgMode === 'auto') return activeDocument.body.classList.contains('theme-dark');
 	return bgMode === 'dark';
 }
 

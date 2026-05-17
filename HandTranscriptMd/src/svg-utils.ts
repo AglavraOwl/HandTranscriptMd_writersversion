@@ -135,7 +135,7 @@ function unescapeXml(s: string): string {
 // Usato dalla pipeline OCR (embed.ts e editor-view.ts) prima di inviare a Gemini.
 export function svgToBase64Png(svgElement: SVGElement): Promise<string> {
 	return new Promise((resolve, reject) => {
-		const cvs = document.createElement('canvas');
+		const cvs = activeDocument.createElement('canvas');
 		const ctx = cvs.getContext('2d')!;
 		const img = new Image();
 		const blob = new Blob(

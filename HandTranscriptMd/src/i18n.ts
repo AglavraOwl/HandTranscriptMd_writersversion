@@ -48,7 +48,7 @@ export function setLocale(lang: string): void {
 		: lang;
 	dict = locales[resolved] ?? en;
 	// Aggiorna i tooltip già presenti nel DOM
-	document.querySelectorAll<HTMLElement>('[data-hwm-key]').forEach(el => {
+	activeDocument.querySelectorAll<HTMLElement>('[data-hwm-key]').forEach(el => {
 		const key = el.getAttribute('data-hwm-key') as keyof typeof en;
 		if (key) el.title = t(key);
 	});

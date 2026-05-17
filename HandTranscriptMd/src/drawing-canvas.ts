@@ -100,7 +100,7 @@ export class DrawingCanvas {
 		this.mobileMode = mobileMode;
 		this.debugFn = debugFn;
 
-		this.canvas = document.createElement('canvas');
+		this.canvas = activeDocument.createElement('canvas');
 		// Dimensione CSS: pixel logici → il browser mostra il canvas a questa dimensione
 		this.canvas.style.width  = width  + 'px';
 		this.canvas.style.height = height + 'px';
@@ -268,7 +268,7 @@ export class DrawingCanvas {
 
 	destroy() {
 		if (this.animFrameId !== null) {
-			cancelAnimationFrame(this.animFrameId);
+			window.cancelAnimationFrame(this.animFrameId);
 		}
 		this.canvas.removeEventListener('pointerdown', this.boundDown);
 		this.canvas.removeEventListener('pointermove', this.boundMove);
@@ -379,7 +379,7 @@ export class DrawingCanvas {
 		if (startLogicalH === targetLogicalH) return;
 
 		if (this.animFrameId !== null) {
-			cancelAnimationFrame(this.animFrameId);
+			window.cancelAnimationFrame(this.animFrameId);
 			this.animFrameId = null;
 		}
 
@@ -406,13 +406,13 @@ export class DrawingCanvas {
 			this.resizeCb?.();
 
 			if (progress < 1) {
-				this.animFrameId = requestAnimationFrame(step);
+				this.animFrameId = window.requestAnimationFrame(step);
 			} else {
 				this.animFrameId = null;
 			}
 		};
 
-		this.animFrameId = requestAnimationFrame(step);
+		this.animFrameId = window.requestAnimationFrame(step);
 	}
 
 	/* --- Coordinate --- */

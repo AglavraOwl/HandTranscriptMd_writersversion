@@ -116,7 +116,7 @@ function setupMutationObserver(plugin: HandwritingPlugin) {
 		// Se Obsidian non ha ancora caricato l'immagine (classe image-embed
 		// assente), riprova tra 150 ms — il caricamento è asincrono.
 		if (!span.classList.contains('image-embed')) {
-			setTimeout(() => tryDecorate(span), 150);
+			window.setTimeout(() => tryDecorate(span), 150);
 			return;
 		}
 
@@ -153,7 +153,7 @@ function setupMutationObserver(plugin: HandwritingPlugin) {
 				// Disable transition temporarily so the height sync is instant (no visual flash).
 				wrapper.classList.add('hwm_no-transition');
 				wrapper.style.setProperty('height', newH + 'px');
-				requestAnimationFrame(() => {
+				window.requestAnimationFrame(() => {
 					wrapper.style.removeProperty('height');
 					wrapper.classList.remove('hwm_no-transition');
 				});
@@ -200,7 +200,7 @@ function setupMutationObserver(plugin: HandwritingPlugin) {
 		}
 	});
 
-	observer.observe(document.body, { childList: true, subtree: true });
+	observer.observe(activeDocument.body, { childList: true, subtree: true });
 	// Disconnette l'observer quando il plugin viene disabilitato
 	plugin.register(() => observer.disconnect());
 }
@@ -615,7 +615,7 @@ function createPortalPanel(
 	// position: relative sullo span è gestita dalla regola CSS
 	// .internal-embed[data-hwm-decorated="1"] — non serve inline style.
 
-	const panel = document.createElement('div');
+	const panel = activeDocument.createElement('div');
 	panel.className = 'hwm_portal-panel';
 	if (isDark) panel.classList.add('hwm_portal-panel--dark');
 	container.appendChild(panel);
@@ -660,7 +660,7 @@ function createPortalPanel(
 	})(); });
 
 	// Separatore visivo
-	const sep = document.createElement('div');
+	const sep = activeDocument.createElement('div');
 	sep.className = 'hwm_separator';
 	panel.appendChild(sep);
 
@@ -694,7 +694,7 @@ function createPortalPanel(
 		if (!img || !img.parentElement) return null;
 		// Crea il wrapper e sposta l'img dentro: nessuna classe/altezza iniziale.
 		// La transizione CSS (height 0.3s ease) è già definita in styles.css su .hwm_clip-wrapper.
-		wrapper = document.createElement('div');
+		wrapper = activeDocument.createElement('div');
 		wrapper.className = 'hwm_clip-wrapper';
 		img.parentElement.insertBefore(wrapper, img);
 		wrapper.appendChild(img);
@@ -717,7 +717,7 @@ function createPortalPanel(
 				wrapper.classList.remove('hwm_overflow-hidden');
 			};
 			wrapper.addEventListener('transitionend', cleanup, { once: true });
-			setTimeout(cleanup, 400); // 300ms transizione + 100ms buffer
+			window.setTimeout(cleanup, 400); // 300ms transizione + 100ms buffer
 		}
 		container.classList.remove('hwm_is-collapsed');
 		collapseBtn.classList.remove('hwm_rotated');
@@ -768,9 +768,9 @@ function createPortalPanel(
 	const showConvertOverlay = (): HTMLElement => {
 		// Nasconde il pannello durante OCR: evita click sui bottoni
 		panel.classList.add('hwm_hidden');
-		const overlay = document.createElement('div');
+		const overlay = activeDocument.createElement('div');
 		overlay.className = 'hwm_convert-overlay';
-		const spinner = document.createElement('div');
+		const spinner = activeDocument.createElement('div');
 		spinner.className = 'hwm_spinner';
 		overlay.appendChild(spinner);
 		container.appendChild(overlay);
@@ -861,7 +861,7 @@ function showInlineConfirm(anchorEl: HTMLElement, msg: string): Promise<boolean>
 // Crea un bottone div nel pannello portale.
 // key: chiave i18n — usata sia per il title che per data-hwm-key (aggiornamento live al cambio lingua)
 function createPanelBtn(parent: HTMLElement, icon: string, key: I18nKey): HTMLElement {
-	const btn = document.createElement('div');
+	const btn = activeDocument.createElement('div');
 	btn.className = 'hwm_btn';
 	btn.setAttribute('title', t(key));
 	btn.setAttribute('data-hwm-key', key);
@@ -886,12 +886,12 @@ function createLegacyPortalButton(
 	svgPath: string,
 	sourcePath: string
 ) {
-	const btn = document.createElement('button');
+	const btn = activeDocument.createElement('button');
 	btn.className = 'hwm_portal-btn';
 	// setIcon: inserisce l'SVG Lucide in modo sicuro (no innerHTML)
 	setIcon(btn, 'pencil');
 	btn.title = t('btn_open_editor');
-	document.body.appendChild(btn);
+	activeDocument.body.appendChild(btn);
 
 	// Apre la tab editor al click
 	btn.addEventListener('click', () => { void (async () => {
@@ -927,9 +927,9 @@ function createLegacyPortalButton(
 			.some(l => (l.view as DrawingEditorView).getEmbedId() === embedId);
 		const inViewport = rect.width > 0 && rect.top < window.innerHeight && rect.bottom > 0;
 		btn.classList.toggle('hwm_hidden', !(inViewport && !editorOpen));
-		requestAnimationFrame(update);
+		window.requestAnimationFrame(update);
 	};
-	requestAnimationFrame(update);
+	window.requestAnimationFrame(update);
 }
 
 // Usa <div> invece di <button> per i bottoni dentro cm-content.
