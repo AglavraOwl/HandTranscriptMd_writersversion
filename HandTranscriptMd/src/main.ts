@@ -51,8 +51,14 @@ export default class HandwritingPlugin extends Plugin {
 		// Applica la lingua interfaccia salvata (o la lingua di sistema se 'auto')
 		setLocale(this.settings.uiLanguage);
 
-		// Rileva cambio tema Obsidian (aggiunta/rimozione classe 'theme-dark' sul body).
-		// Se bgMode è 'auto', notifica tutti i listener per aggiornare colori e SVG.
+		// Rileva cambio tema Obsidian. Doppio meccanismo per massima compatibilità Android:
+		// - css-change: evento Obsidian garantito al cambio tema (più affidabile su alcuni WebView Android)
+		// - MutationObserver: fallback per cambii di classe body da plugin terzi o versioni vecchie
+		this.registerEvent(
+			this.app.workspace.on('css-change', () => {
+				if (this.settings.bgMode === 'auto') this.notifyBgModeChange();
+			})
+		);
 		const themeObserver = new MutationObserver(() => {
 			if (this.settings.bgMode === 'auto') this.notifyBgModeChange();
 		});
