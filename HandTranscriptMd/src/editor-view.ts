@@ -9,7 +9,7 @@ import { ItemView, WorkspaceLeaf, TFile, Notice, Platform, Modal, App, MarkdownV
 import type HandwritingPlugin from './main';
 import { DrawingCanvas, Stroke } from './drawing-canvas';
 import { strokesToSvg, parseSvgStrokes, svgToBase64Png, archiveSvgFile } from './svg-utils';
-import { getEffectiveBgColor, getEffectiveLineColor, remapStrokeColor, LIGHT_COLORS, DARK_COLORS, resolveIsDark } from './settings';
+import { getEffectiveBgColor, getEffectiveLineColor, remapStrokeColor, LIGHT_COLORS, DARK_COLORS, resolveIsDark, BgMode } from './settings';
 import { getRecognizer } from './recognizer';
 import { parseHandwritingToMarkdown } from './md-parser';
 import { t, type I18nKey } from './i18n';
@@ -147,8 +147,10 @@ async function buildEditorUI(opts: {
 	eraserBtn.classList.add('hwm_eraser-btn');
 	toolbar.createDiv({ cls: 'hwm_separator' });
 
-	// Palette colori — valori importati da settings.ts (unica fonte di verità)
-	const colors = isDark ? [...DARK_COLORS] : [...LIGHT_COLORS];
+	// Palette colori — valori importati da settings.ts (unica fonte di verità).
+	// let (non const) perché il bgModeListener aggiorna la palette al cambio tema.
+	let colors = isDark ? [...DARK_COLORS] : [...LIGHT_COLORS];
+	let activeColorIdx = 0; // indice del pallino attivo, usato per aggiornare setColor al cambio tema
 	const colorWrap = toolbar.createDiv({ cls: 'hwm_colors' });
 	const colorBtns: HTMLElement[] = [];
 	for (const c of colors) {
@@ -229,17 +231,21 @@ async function buildEditorUI(opts: {
 		handle.classList.toggle('hwm_resize-handle--dark', dark);
 		// Sfondo via CSS var (no stile inline)
 		el.setCssProps({ '--hwm-bg': getEffectiveBgColor(plugin.settings) });
-		// Aggiorna i pallini colore palette via CSS var
+		// Aggiorna palette e colore attivo al nuovo tema
 		const newColors = dark ? DARK_COLORS : LIGHT_COLORS;
+		colors = [...newColors]; // aggiorna il riferimento usato dai click handler
 		colorBtns.forEach((btn, i) => {
 			btn.setCssProps({ '--hwm-btn-color': newColors[i] ?? '' });
 			btn.setAttribute('title', newColors[i] ?? '');
 		});
+		canvas.setColor(colors[activeColorIdx]!); // aggiorna colore penna attivo
 		// Aggiorna sfondo e righe nel canvas
 		canvas.setBackground(
 			getEffectiveBgColor(plugin.settings),
 			getEffectiveLineColor(plugin.settings)
 		);
+		// Remap colori tratti al nuovo tema (dark ↔ light)
+		canvas.remapStrokeColors(c => remapStrokeColor(c, bgMode as BgMode));
 	};
 	plugin.bgModeListeners.add(bgModeListener);
 
@@ -266,6 +272,7 @@ async function buildEditorUI(opts: {
 		colorBtns[i]!.addEventListener('click', () => {
 			colorBtns.forEach(b => b.classList.remove('hwm_active'));
 			colorBtns[i]!.classList.add('hwm_active');
+			activeColorIdx = i;
 			cv.setColor(colors[i]!);
 		});
 	}
@@ -458,6 +465,8 @@ export class DrawingModal extends Modal {
 	private saveTimer: ReturnType<typeof setTimeout> | null = null;
 	// Listener per aggiornare la classe dark al cambio bgMode
 	private bgModeListener: ((bgMode: string) => void) | null = null;
+	// Chiude il modal al resize finestra (evita bug canvas su Windows)
+	private resizeHandler: (() => void) | null = null;
 	// Callback invocato alla chiusura del modal (usato per nascondere/mostrare il bottone matita)
 	onClosed?: () => void;
 
@@ -473,9 +482,20 @@ export class DrawingModal extends Modal {
 	async onOpen() {
 		this.contentEl.addClass('hwm_editor-view');
 		await this.buildEditor();
+
+		// RAF evita falso positivo: il resize iniziale generato dall'apertura del modal stesso
+		window.requestAnimationFrame(() => {
+			this.resizeHandler = () => this.close();
+			window.addEventListener('resize', this.resizeHandler);
+		});
 	}
 
 	onClose() {
+		// Rimuove listener resize prima del cleanup principale
+		if (this.resizeHandler) {
+			window.removeEventListener('resize', this.resizeHandler);
+			this.resizeHandler = null;
+		}
 		void (async () => {
 			if (this.canvas) {
 				await this.saveSvg();

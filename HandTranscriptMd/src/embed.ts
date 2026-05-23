@@ -886,12 +886,23 @@ function createLegacyPortalButton(
 	svgPath: string,
 	sourcePath: string
 ) {
-	const btn = activeDocument.createElement('button');
+	// div invece di button: evita stili globali Obsidian (padding, min-width) sui button
+	const btn = activeDocument.createElement('div');
 	btn.className = 'hwm_portal-btn';
+	btn.setAttribute('role', 'button');
+	btn.setAttribute('tabindex', '0');
+	btn.setAttribute('aria-label', t('btn_open_editor'));
 	// setIcon: inserisce l'SVG Lucide in modo sicuro (no innerHTML)
 	setIcon(btn, 'pencil');
-	btn.title = t('btn_open_editor');
 	activeDocument.body.appendChild(btn);
+
+	// Accessibilità tastiera: Enter/Space attivano il bottone come un <button> nativo
+	btn.addEventListener('keydown', (e) => {
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault();
+			btn.click();
+		}
+	});
 
 	// Apre la tab editor al click
 	btn.addEventListener('click', () => { void (async () => {

@@ -7,14 +7,14 @@
    UTILITY CLASSES — Usate da JS per toggle
    ======================================== */
 
-/* Nasconde un elemento (sostituisce style.display = 'none') */
-.hwm_hidden {
-	display: none !important;
-}
+/* Nasconde un elemento (sostituisce style.display = 'none').
+   Compound selector (0,2,0) batte specificità dei selettori target (0,1,0). */
+.hwm_portal-panel.hwm_hidden,
+.hwm_portal-btn.hwm_hidden { display: none; }
 
 /* Annulla pointer-events (usato da stripContentEditableFalse sul formato legacy) */
 .hwm_no-pointer {
-	pointer-events: none !important;
+	pointer-events: none;
 }
 
 /* Overflow hidden per l'animazione collapse del wrapper immagine */
@@ -22,10 +22,9 @@
 	overflow: hidden;
 }
 
-/* Disabilita transizioni CSS temporaneamente (usato in syncWrapperHeight) */
-.hwm_no-transition {
-	transition: none !important;
-}
+/* Disabilita transizioni CSS temporaneamente (usato in syncWrapperHeight).
+   Compound selector (0,2,0) batte .hwm_clip-wrapper { transition } (0,1,0). */
+.hwm_clip-wrapper.hwm_no-transition { transition: none; }
 
 /* Wrapper clip (collapse/expand nuovo formato).
    Animiamo solo il wrapper, non il container span, così il ResizeObserver
@@ -560,23 +559,22 @@
 	color: #ffffff;
 }
 
-/* Bottone cerchio singolo (formato legacy) */
+/* Bottone cerchio singolo (formato legacy).
+   Usa <div role="button"> invece di <button> per evitare gli stili globali Obsidian sui button. */
 .hwm_portal-btn {
 	position: fixed; /* coordinate viewport via CSS var --hwm-top e --hwm-left */
 	top: var(--hwm-top, 0);
 	left: var(--hwm-left, 0);
 	z-index: 100;
-	/* Cerchio perfetto: dimensioni fisse con !important per sovrascrivere
-	   gli stili globali di Obsidian sui button che aggiungono padding */
-	width: 36px !important;
-	height: 36px !important;
-	min-width: 36px !important;
-	min-height: 36px !important;
-	padding: 0 !important;
-	border-radius: 50% !important;
-	border: none !important;
-	background: var(--interactive-accent) !important;
-	color: #ffffff !important;
+	width: 36px;
+	height: 36px;
+	min-width: 36px;
+	min-height: 36px;
+	padding: 0;
+	border-radius: 50%;
+	border: none;
+	background: var(--interactive-accent);
+	color: #ffffff;
 	cursor: pointer;
 	display: flex;
 	align-items: center;
@@ -586,10 +584,10 @@
 	transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 .hwm_portal-btn svg {
-	width: 18px !important;
-	height: 18px !important;
+	width: 18px;
+	height: 18px;
 	flex-shrink: 0;
-	stroke: #ffffff !important; /* forza icona bianca indipendentemente da currentColor */
+	stroke: #ffffff; /* forza icona bianca indipendentemente da currentColor */
 }
 .hwm_portal-btn:hover {
 	transform: scale(1.1);
@@ -714,9 +712,10 @@
 	transform: translateY(-50%);
 }
 
-/* Nasconde la X nativa di Obsidian nel DrawingModal: la chiusura avviene dal bottone X in toolbar */
-.hwm_modal .modal-close-button {
-	display: none !important;
+/* Nasconde la X nativa di Obsidian nel DrawingModal: la chiusura avviene dal bottone X in toolbar.
+   Specificità 0,3,0 basta a battere Obsidian senza !important. */
+.modal-container .hwm_modal .modal-close-button {
+	display: none;
 }
 
 /* Overlay di conferma inline — no Modal annidato, nessun furto di focus */
@@ -730,10 +729,10 @@
 	gap: 12px;
 	z-index: 100; /* sopra il pannello portale (z-index: 10) */
 	border-radius: inherit;
-	pointer-events: auto !important; /* override pointer-events:none dello span padre */
+	pointer-events: auto; /* override pointer-events:none dello span padre */
 }
 .hwm_confirm-overlay button {
-	pointer-events: auto !important;
+	pointer-events: auto;
 }
 .hwm_confirm-msg {
 	color: #ffffff;
@@ -754,7 +753,7 @@
 	gap: 12px;
 	z-index: 100;
 	border-radius: inherit;
-	pointer-events: auto !important; /* blocca click sull'SVG sottostante */
+	pointer-events: auto; /* blocca click sull'SVG sottostante */
 }
 /* Rotellina di caricamento */
 .hwm_spinner {
@@ -779,7 +778,7 @@
 }
 /* Pulsante OK per chiudere l'overlay di errore */
 .hwm_convert-ok-btn {
-	pointer-events: auto !important;
+	pointer-events: auto;
 	cursor: pointer;
 }
 /* Variante editor: copre l'intero modal/tab con z-index alto

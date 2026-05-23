@@ -226,6 +226,19 @@ export class DrawingCanvas {
 		this.redraw();
 	}
 
+	// Remap colori di tutti i tratti (correnti + history) al cambio tema.
+	// fn: funzione pura che restituisce il nuovo colore dato quello corrente.
+	// Non modifica la history — undo/redo continuano a funzionare con i colori aggiornati.
+	remapStrokeColors(fn: (color: string) => string) {
+		// Remap tratti correnti
+		for (const s of this.strokes) s.color = fn(s.color);
+		// Remap tutti gli snapshot in history (così undo/redo mantiene colori coerenti)
+		for (const snapshot of this.history) {
+			for (const s of snapshot) s.color = fn(s.color);
+		}
+		this.redraw();
+	}
+
 	// Torna allo stato precedente nella history
 	undo(): boolean {
 		if (this.historyIdx <= 0) return false;
