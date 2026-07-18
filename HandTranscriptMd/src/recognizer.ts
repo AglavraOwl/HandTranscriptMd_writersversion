@@ -43,12 +43,14 @@ class GeminiRecognizer implements IRecognizer {
 		// Costruisce il prompt specificando le lingue attese e il formato di output
 		const langList = this.languages.join(', ');
 		const prompt =
-			`Sei un sistema OCR specializzato in scrittura a mano. ` +
-			`Analizza l'immagine e trascrivi esattamente il testo scritto. ` +
-			`Le lingue attese sono: ${langList}. ` +
-			`Preserva i simboli markdown scritti dall'utente ` +
-			`(es. #, ##, ###, -, *, >, \`\`\`, **testo**, *testo*, ==testo==, ~~testo~~, - [ ], - [x]). ` +
-			`Restituisci SOLO il testo trascritto, senza alcuna spiegazione aggiuntiva.`;
+			`You are an OCR system specialized in handwriting recognition. ` +
+			`Analyze the image and transcribe exactly the text that was written. ` +
+			`The expected languages are: ${langList}. ` +
+			`Preserve the markdown symbols written by the user ` +
+			`(e.g. #, ##, ###, -, *, >, \`\`\`, **text**, *text*, ==text==, ~~text~~, - [ ], - [x]). ` +
+			`When text spans multiple lines due to page space limits (word wrap), ` +
+			`join those lines into a single continuous paragraph, replacing the line break with a space. ` +
+			`Return ONLY the transcribed text, as one continuous paragraph, with no additional explanation.`;
 
 		// requestUrl è la funzione Obsidian per le richieste HTTP:
 		// funziona uguale su Desktop e Android (a differenza di fetch nativo).
