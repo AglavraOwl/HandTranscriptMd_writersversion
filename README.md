@@ -1,4 +1,6 @@
-# HandTranscriptMd
+# HandTranscriptMd — Writer's Edition
+
+> This is a personal fork of [HandTranscriptMd](https://github.com/gabriele-cusato/HandTranscriptMd) by Gabriele Cusato, maintained by [AglavraOwl](https://github.com/AglavraOwl) for a longform-writing workflow. See the [commit history](https://github.com/AglavraOwl/HandTranscriptMd_writersversion/commits/master/) for what's changed from the original.
 
 Convert handwritten notes (drawn with a stylus on a canvas) into structured Markdown, directly inside Obsidian. Works on both Windows (desktop) and Android (mobile with stylus).
 

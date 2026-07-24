@@ -1,10 +1,10 @@
 {
 	"id": "handwritingMD_writersedition",
-	"name": "HandTranscriptMd",
-	"version": "1.1.1",
+	"name": "HandTranscriptMd (Writer's Edition)",
+	"version": "1.1.2",
 	"minAppVersion": "1.7.2",
 	"description": "Inline handwriting canvas with OCR conversion to structured markdown. Requires a free Gemini API key.",
-	"author": "GabrieleC",
-	"authorUrl": "https://github.com/gabriele-cusato",
+	"author": "AglavraOwl",
+	"authorUrl": "https://github.com/AglavraOwl",
 	"isDesktopOnly": false
 }
