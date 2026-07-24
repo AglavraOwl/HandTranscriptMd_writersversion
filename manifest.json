@@ -1,7 +1,7 @@
 {
-	"id": "handwriting-to-markdown",
+	"id": "handwritingMD_writersedition",
 	"name": "HandTranscriptMd",
-	"version": "1.0.4",
+	"version": "1.1.0",
 	"minAppVersion": "1.7.2",
 	"description": "Inline handwriting canvas with OCR conversion to structured markdown. Requires a free Gemini API key.",
 	"author": "GabrieleC",

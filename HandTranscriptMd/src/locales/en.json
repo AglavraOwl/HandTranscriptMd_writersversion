@@ -36,6 +36,8 @@
 	"error_conversion": "Conversion error: ",
 	"btn_pen": "Pen",
 	"btn_eraser": "Eraser",
+	"btn_continuous": "Continuous input mode (join lines into paragraphs, //Z for a paragraph break)",
+	"kw_z_output": "paragraph break (Continuous mode only)",
 	"btn_undo": "Undo",
 	"btn_redo": "Redo",
 	"btn_clear": "Clear all",

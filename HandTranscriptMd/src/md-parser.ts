@@ -392,15 +392,73 @@ export function expandKeywords(text: string, fnStart = 1): string {
 }
 
 // =============================================================================
+// MODALITÀ CONTINUOUS — collapseContinuousLines
+// =============================================================================
+
+/**
+ * Unisce tutte le righe del testo grezzo OCR in paragrafi continui, sostituendo
+ * ogni a capo con uno spazio. Un a capo di paragrafo viene inserito SOLO dove
+ * l'utente ha scritto esplicitamente //Z.
+ *
+ * Fatto in codice (non nel prompt) perché il modello non è affidabile nel
+ * decidere da solo quali a capo unire — qui invece è deterministico: in
+ * Continuous mode l'OCR trascrive riga per riga senza unire nulla (vedi
+ * recognizer.ts), e questa funzione fa l'unione.
+ *
+ * Le righe //KEYWORD (es. //H1, //LIST) restano su una riga propria e non
+ * vengono unite al testo circostante, per non rompere il sistema di keyword
+ * gestito da expandKeywords.
+ */
+export function collapseContinuousLines(rawText: string): string {
+	const lines = rawText.split('\n');
+	const out: string[] = [];
+	let buffer: string[] = [];
+
+	const flush = () => {
+		if (buffer.length > 0) {
+			out.push(buffer.join(' '));
+			buffer = [];
+		}
+	};
+
+	for (const rawLine of lines) {
+		const line = rawLine.trim();
+
+		// //Z esplicito → interruzione di paragrafo
+		if (/^\/\/\s*Z\s*$/i.test(line)) {
+			flush();
+			out.push('');
+			continue;
+		}
+
+		// Riga vuota nel testo grezzo: ignorata, solo //Z crea un a capo
+		if (line === '') continue;
+
+		// Altre keyword //KEYWORD: restano su una riga propria
+		if (/^\/\/\s*[A-Za-z0-9_]/i.test(line)) {
+			flush();
+			out.push(line);
+			continue;
+		}
+
+		buffer.push(line);
+	}
+	flush();
+
+	return out.join('\n');
+}
+
+// =============================================================================
 // PIPELINE COMPLETA
 // =============================================================================
 
 /**
- * Pipeline completa: normalizzazione simboli → espansione keyword.
+ * Pipeline completa: [collapse in Continuous mode] → normalizzazione simboli → espansione keyword.
  * Questa è la funzione principale da usare per l'output OCR grezzo.
  */
-export function parseHandwritingToMarkdown(rawOcrText: string): string {
-	return expandKeywords(normalizeMarkdownSymbols(rawOcrText));
+export function parseHandwritingToMarkdown(rawOcrText: string, continuousMode = false): string {
+	const preprocessed = continuousMode ? collapseContinuousLines(rawOcrText) : rawOcrText;
+	return expandKeywords(normalizeMarkdownSymbols(preprocessed));
 }
 
 

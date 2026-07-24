@@ -36,6 +36,8 @@
 	"error_conversion": "変換エラー：",
 	"btn_pen": "ペン",
 	"btn_eraser": "消しゴム",
+	"btn_continuous": "連続入力モード（行を段落に結合します。//Zで改段落）",
+	"kw_z_output": "改段落（Continuousモードのみ）",
 	"btn_undo": "元に戻す",
 	"btn_redo": "やり直す",
 	"btn_clear": "すべて消去",

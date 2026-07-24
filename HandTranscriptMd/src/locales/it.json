@@ -36,6 +36,8 @@
 	"error_conversion": "Errore nella conversione: ",
 	"btn_pen": "Penna",
 	"btn_eraser": "Gomma",
+	"btn_continuous": "Modalità input continuo (unisce le righe in paragrafi, //Z per andare a capo)",
+	"kw_z_output": "a capo (solo in modalità Continuous)",
 	"btn_undo": "Annulla",
 	"btn_redo": "Ripristina",
 	"btn_clear": "Cancella tutto",

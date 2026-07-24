@@ -36,6 +36,8 @@
 	"error_conversion": "Błąd konwersji: ",
 	"btn_pen": "Pióro",
 	"btn_eraser": "Gumka",
+	"btn_continuous": "Tryb ciągłego wprowadzania (łączy linie w akapity, //Z dla podziału akapitu)",
+	"kw_z_output": "podział akapitu (tylko w trybie Continuous)",
 	"btn_undo": "Cofnij",
 	"btn_redo": "Ponów",
 	"btn_clear": "Wyczyść wszystko",

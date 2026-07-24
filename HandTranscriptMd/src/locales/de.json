@@ -36,6 +36,8 @@
 	"error_conversion": "Konvertierungsfehler: ",
 	"btn_pen": "Stift",
 	"btn_eraser": "Radierer",
+	"btn_continuous": "Kontinuierlicher Eingabemodus (fügt Zeilen zu Absätzen zusammen, //Z für einen Absatzumbruch)",
+	"kw_z_output": "Absatzumbruch (nur im Continuous-Modus)",
 	"btn_undo": "Rückgängig",
 	"btn_redo": "Wiederholen",
 	"btn_clear": "Alles löschen",

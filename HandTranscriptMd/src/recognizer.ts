@@ -28,7 +28,7 @@ interface GeminiResponse {
 // alternativo (es. OCR locale) senza modificare embed.ts
 
 export interface IRecognizer {
-	recognize(imageBase64: string): Promise<string>;
+	recognize(imageBase64: string, continuousMode?: boolean): Promise<string>;
 }
 
 /* ---------- GeminiRecognizer ---------- */
@@ -39,15 +39,30 @@ class GeminiRecognizer implements IRecognizer {
 		private languages: string[]
 	) {}
 
-	async recognize(imageBase64: string): Promise<string> {
+	async recognize(imageBase64: string, continuousMode = false): Promise<string> {
 		// Costruisce il prompt specificando le lingue attese e il formato di output
 		const langList = this.languages.join(', ');
-		const prompt =
+		// Simboli markdown preservati (identici nei due prompt)
+		const preserved = `#, ##, ###, -, *, >, %%, \`\`\`, **text**, *text*, ==text==, ~~text~~, - [ ], - [x]`;
+
+		// Modalita Continuous: non chiediamo al modello di decidere quali a capo unire
+		// (giudizio inaffidabile) -- trascrive letteralmente riga per riga, il plugin
+		// unisce poi le righe in codice (vedi md-parser.ts, collapseContinuousLines).
+		// L'unica cosa che il modello deve riconoscere fedelmente e' il marcatore //Z.
+		const prompt = continuousMode
+			?
+			`You are an OCR system specialized in handwriting recognition. ` +
+			`Analyze the image and transcribe exactly the text that was written, line by line, ` +
+			`exactly as laid out -- do NOT try to join or merge any lines yourself, keep every line break exactly where the handwriting has one. ` +
+			`The expected languages are: ${langList}. ` +
+			`Preserve the markdown symbols written by the user (e.g. ${preserved}). ` +
+			`If the user wrote the marker //Z, transcribe it exactly as "//Z" on its own line, unchanged. ` +
+			`Return ONLY the transcribed text, with no additional explanation.`
+			:
 			`You are an OCR system specialized in handwriting recognition. ` +
 			`Analyze the image and transcribe exactly the text that was written. ` +
 			`The expected languages are: ${langList}. ` +
-			`Preserve the markdown symbols written by the user ` +
-			`(e.g. #, ##, ###, -, *, >, \`\`\`, **text**, *text*, ==text==, ~~text~~, - [ ], - [x]). ` +
+			`Preserve the markdown symbols written by the user (e.g. ${preserved}). ` +
 			`When text spans multiple lines due to page space limits (word wrap), ` +
 			`join those lines into a single continuous paragraph, replacing the line break with a space. ` +
 			`Return ONLY the transcribed text, as one continuous paragraph, with no additional explanation.`;

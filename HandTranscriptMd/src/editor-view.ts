@@ -147,6 +147,12 @@ async function buildEditorUI(opts: {
 	eraserBtn.classList.add('hwm_eraser-btn');
 	toolbar.createDiv({ cls: 'hwm_separator' });
 
+	// Continuous mode: unisce le righe in paragrafi, //Z per andare a capo (vedi md-parser.ts)
+	const continuousBtn = mkBtn(toolbar, 'pilcrow', 'btn_continuous');
+	continuousBtn.classList.add('hwm_continuous-btn');
+	continuousBtn.classList.toggle('hwm_active', plugin.settings.continuousMode);
+	toolbar.createDiv({ cls: 'hwm_separator' });
+
 	// Palette colori — valori importati da settings.ts (unica fonte di verità).
 	// let (non const) perché il bgModeListener aggiorna la palette al cambio tema.
 	let colors = isDark ? [...DARK_COLORS] : [...LIGHT_COLORS];
@@ -268,6 +274,11 @@ async function buildEditorUI(opts: {
 		eraserBtn.classList.add('hwm_active');
 		penBtn.classList.remove('hwm_active');
 	});
+	continuousBtn.addEventListener('click', () => { void (async () => {
+		plugin.settings.continuousMode = !plugin.settings.continuousMode;
+		continuousBtn.classList.toggle('hwm_active', plugin.settings.continuousMode);
+		await plugin.saveSettings();
+	})(); });
 	for (let i = 0; i < colorBtns.length; i++) {
 		colorBtns[i]!.addEventListener('click', () => {
 			colorBtns.forEach(b => b.classList.remove('hwm_active'));
@@ -406,9 +417,9 @@ export class DrawingEditorView extends ItemView {
 			const svgEl  = new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement as unknown as SVGElement;
 			const base64 = await svgToBase64Png(svgEl);
 			const recognizer = getRecognizer(this.plugin.settings.geminiApiKey, this.plugin.settings.ocrLanguages);
-			const rawText = await recognizer.recognize(base64);
+			const rawText = await recognizer.recognize(base64, this.plugin.settings.continuousMode);
 			if (!rawText.trim()) throw new Error(t('error_no_text'));
-			const markdown = parseHandwritingToMarkdown(rawText);
+			const markdown = parseHandwritingToMarkdown(rawText, this.plugin.settings.continuousMode);
 			await archiveSvgFile(this.svgPath, this.plugin);
 			await replaceInMdFile(this.sourcePath, this.svgPath, this.embedId, '\n' + markdown + '\n', this.plugin);
 			overlay.remove();
@@ -563,9 +574,9 @@ export class DrawingModal extends Modal {
 			const svgEl  = new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement as unknown as SVGElement;
 			const base64 = await svgToBase64Png(svgEl);
 			const recognizer = getRecognizer(this.plugin.settings.geminiApiKey, this.plugin.settings.ocrLanguages);
-			const rawText = await recognizer.recognize(base64);
+			const rawText = await recognizer.recognize(base64, this.plugin.settings.continuousMode);
 			if (!rawText.trim()) throw new Error(t('error_no_text'));
-			const markdown = parseHandwritingToMarkdown(rawText);
+			const markdown = parseHandwritingToMarkdown(rawText, this.plugin.settings.continuousMode);
 			await archiveSvgFile(this.svgPath, this.plugin);
 			await replaceInMdFile(this.sourcePath, this.svgPath, this.embedId, '\n' + markdown + '\n', this.plugin);
 			overlay.remove();

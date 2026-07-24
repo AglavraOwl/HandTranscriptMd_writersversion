@@ -36,6 +36,8 @@
 	"error_conversion": "Error de conversión: ",
 	"btn_pen": "Lápiz",
 	"btn_eraser": "Borrador",
+	"btn_continuous": "Modo de entrada continua (une líneas en párrafos, //Z para un salto de párrafo)",
+	"kw_z_output": "salto de párrafo (solo en modo Continuous)",
 	"btn_undo": "Deshacer",
 	"btn_redo": "Rehacer",
 	"btn_clear": "Borrar todo",

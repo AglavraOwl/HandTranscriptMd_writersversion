@@ -36,6 +36,8 @@
 	"error_conversion": "Erro na conversão: ",
 	"btn_pen": "Caneta",
 	"btn_eraser": "Borracha",
+	"btn_continuous": "Modo de entrada contínua (une linhas em parágrafos, //Z para quebra de parágrafo)",
+	"kw_z_output": "quebra de parágrafo (somente no modo Continuous)",
 	"btn_undo": "Desfazer",
 	"btn_redo": "Refazer",
 	"btn_clear": "Limpar tudo",

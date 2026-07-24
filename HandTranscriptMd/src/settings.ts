@@ -18,6 +18,7 @@ export interface HandwritingSettings {
 	geminiApiKey: string;         // chiave API Google Gemini per l'OCR
 	debugMode: boolean;           // mostra Notice di debug per eventi IME/touch
 	uiLanguage: string;           // lingua dell'interfaccia impostazioni ('auto' = segue sistema)
+	continuousMode: boolean;      // unisce tutte le righe in un unico paragrafo, //Z per andare a capo
 }
 
 // Colori predefiniti per le modalità light e dark
@@ -89,6 +90,7 @@ export const DEFAULT_SETTINGS: HandwritingSettings = {
 	geminiApiKey: '',
 	debugMode: false,
 	uiLanguage: 'auto',           // default: segue la lingua di sistema di Obsidian
+	continuousMode: false,
 };
 
 export class HandwritingSettingTab extends PluginSettingTab {
@@ -276,6 +278,7 @@ export class HandwritingSettingTab extends PluginSettingTab {
 			['//TIME',            '//TIME',                   'HH:mm'],
 			['//DATETIME',        '//DATETIME',               'YYYY-MM-DD HH:mm'],
 			['//INDENT',          `//INDENT ${X}`,            `  ${X}`],
+			['//Z',               '//Z',                      t('kw_z_output')],
 		];
 
 		const table = details.createEl('table', { cls: 'hwm_keyword-table' });

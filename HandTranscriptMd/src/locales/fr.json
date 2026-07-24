@@ -36,6 +36,8 @@
 	"error_conversion": "Erreur de conversion : ",
 	"btn_pen": "Stylo",
 	"btn_eraser": "Gomme",
+	"btn_continuous": "Mode saisie continue (fusionne les lignes en paragraphes, //Z pour un saut de paragraphe)",
+	"kw_z_output": "saut de paragraphe (mode Continuous uniquement)",
 	"btn_undo": "Annuler",
 	"btn_redo": "Rétablir",
 	"btn_clear": "Tout effacer",

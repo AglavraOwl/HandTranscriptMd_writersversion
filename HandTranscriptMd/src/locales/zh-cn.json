@@ -36,6 +36,8 @@
 	"error_conversion": "转换错误：",
 	"btn_pen": "画笔",
 	"btn_eraser": "橡皮擦",
+	"btn_continuous": "连续输入模式（将换行合并为段落，//Z 表示分段）",
+	"kw_z_output": "分段（仅限连续模式）",
 	"btn_undo": "撤销",
 	"btn_redo": "重做",
 	"btn_clear": "全部清除",

@@ -379,6 +379,7 @@
    quando la classe viene aggiunta/rimossa via JS. */
 .hwm_toolbar--compact .hwm_pen-btn,
 .hwm_toolbar--compact .hwm_eraser-btn,
+.hwm_toolbar--compact .hwm_continuous-btn:not(.hwm_active),
 .hwm_toolbar--compact .hwm_clear-btn,
 .hwm_toolbar--compact .hwm_save-btn,
 .hwm_toolbar--compact .hwm_color-btn:not(.hwm_active),
