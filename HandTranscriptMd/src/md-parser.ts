@@ -408,6 +408,11 @@ export function expandKeywords(text: string, fnStart = 1): string {
  * Le righe //KEYWORD (es. //H1, //LIST) restano su una riga propria e non
  * vengono unite al testo circostante, per non rompere il sistema di keyword
  * gestito da expandKeywords.
+ *
+ * //Z viene cercato ovunque nella riga, non solo come riga a sé stante:
+ * il modello OCR non è affidabile nell'isolarlo sempre su una riga propria
+ * (a volte lo incolla alla frase precedente o successiva), quindi la riga
+ * viene spezzata sul marcatore ovunque compaia.
  */
 export function collapseContinuousLines(rawText: string): string {
 	const lines = rawText.split('\n');
@@ -421,27 +426,35 @@ export function collapseContinuousLines(rawText: string): string {
 		}
 	};
 
+	// \/\/\s*Z seguito da un confine di parola (non da altre lettere/numeri,
+	// per non scambiare //Z per l'inizio di un'altra keyword tipo //ZZZ)
+	const Z_MARKER = /\/\/\s*Z(?![A-Za-z0-9_])/gi;
+
 	for (const rawLine of lines) {
 		const line = rawLine.trim();
-
-		// //Z esplicito → interruzione di paragrafo
-		if (/^\/\/\s*Z\s*$/i.test(line)) {
-			flush();
-			out.push('');
-			continue;
-		}
 
 		// Riga vuota nel testo grezzo: ignorata, solo //Z crea un a capo
 		if (line === '') continue;
 
-		// Altre keyword //KEYWORD: restano su una riga propria
-		if (/^\/\/\s*[A-Za-z0-9_]/i.test(line)) {
+		// Altre keyword //KEYWORD (diverse da //Z): restano su una riga propria
+		const kw = line.match(/^\/\/\s*([A-Za-z0-9_]+)/i);
+		if (kw && kw[1]!.toUpperCase() !== 'Z') {
 			flush();
 			out.push(line);
 			continue;
 		}
 
-		buffer.push(line);
+		// Spezza la riga su ogni occorrenza di //Z, inserendo un'interruzione
+		// di paragrafo ad ogni marcatore trovato (anche più di uno per riga)
+		const parts = line.split(Z_MARKER);
+		parts.forEach((part, idx) => {
+			const trimmedPart = part.trim();
+			if (trimmedPart) buffer.push(trimmedPart);
+			if (idx < parts.length - 1) {
+				flush();
+				out.push('');
+			}
+		});
 	}
 	flush();
 
