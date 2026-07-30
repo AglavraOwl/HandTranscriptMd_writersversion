@@ -195,8 +195,21 @@ async function buildEditorUI(opts: {
 	closeBtn.addEventListener('click', () => { void opts.onClose(); });
 
 	// --- Scroll container e canvas ---
-	const scrollWrap  = el.createDiv({ cls: 'hwm_editor-scroll' });
+	// canvasArea: contenitore posizionato (position:relative) che ospita lo scroll
+	// e il bottone "aggiungi sezione" in overlay, fisso rispetto al viewport visibile
+	// (non scrolla via col contenuto, a differenza di un figlio di scrollWrap).
+	const canvasArea  = el.createDiv({ cls: 'hwm_canvas-area' });
+	const scrollWrap  = canvasArea.createDiv({ cls: 'hwm_editor-scroll' });
 	const canvasWrap  = scrollWrap.createDiv({ cls: 'hwm_canvas-wrap' });
+
+	// Bottone overlay: aggiunge manualmente una sezione di scrittura sotto,
+	// in alto a destra (non in basso, per evitare tocchi accidentali mentre si scrive).
+	const addSectionBtn = canvasArea.createDiv({
+		cls: 'hwm_add-section-btn',
+		attr: { title: t('btn_add_section'), role: 'button', tabindex: '0' }
+	});
+	addSectionBtn.setAttribute('data-hwm-key', 'btn_add_section');
+	setIcon(addSectionBtn, 'arrow-down');
 
 	// Carica i tratti dal file SVG
 	const { strokes, canvasWidth: savedW, canvasHeight: savedH } = await loadStrokesFromSvg(opts.svgPath, plugin);
@@ -258,7 +271,9 @@ async function buildEditorUI(opts: {
 	// Auto-scroll quando il canvas si espande, ma solo se non si sta disegnando.
 	// Durante il disegno, lo scroll sposterebbe il canvas e le coordinate salterebbero.
 	canvas.onResize(() => {
-		if (!canvas.isPointerDown()) scrollWrap.scrollTop = scrollWrap.scrollHeight;
+		if (!canvas.isPointerDown() && plugin.settings.autoScrollOnExpand) {
+			scrollWrap.scrollTop = scrollWrap.scrollHeight;
+		}
 	});
 
 	// --- Event handlers ---
@@ -287,6 +302,7 @@ async function buildEditorUI(opts: {
 			cv.setColor(colors[i]!);
 		});
 	}
+	addSectionBtn.addEventListener('click', () => cv.expandSection());
 	undoBtn.addEventListener('click', () => cv.undo());
 	redoBtn.addEventListener('click', () => cv.redo());
 	clearBtn.addEventListener('click', () => cv.clear());

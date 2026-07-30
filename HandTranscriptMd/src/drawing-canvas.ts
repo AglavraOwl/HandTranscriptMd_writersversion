@@ -135,6 +135,13 @@ export class DrawingCanvas {
 	// Registra callback per quando l'altezza cambia (utile per auto-scroll nell'overlay)
 	onResize(cb: () => void) { this.resizeCb = cb; }
 
+	// Aggiunge una sezione di scrittura in fondo al canvas. Chiamato sia
+	// dall'auto-expand (pennino vicino al fondo) sia dal bottone manuale in overlay.
+	expandSection() {
+		if (this.animFrameId !== null) return;
+		this.animateHeight(this.logicalHeight + this.EXPAND_AMOUNT);
+	}
+
 	// Adatta il canvas alla larghezza di display indicata (rotazione schermo, apertura modal).
 	// - expandWorld=true (default, Desktop modal): worldWidth cresce → SVG più largo.
 	// - expandWorld=false (Android ResizeObserver): worldWidth invariato → SVG sempre a canvasWidth.
@@ -377,13 +384,10 @@ export class DrawingCanvas {
 	/* --- Auto-expand --- */
 
 	private checkAutoExpand(pt: Point) {
-		// Se un'animazione è già in corso non lanciarne un'altra:
-		// ripartire da un'altezza intermedia causerebbe un effetto di restringimento.
-		if (this.animFrameId !== null) return;
 		// Confronto in pixel logici: pt.y è in coordinate mondo, logicalHeight è logica
+		// (expandSection ha già il suo guard su animFrameId contro animazioni sovrapposte)
 		if (pt.y > this.logicalHeight - this.EXPAND_MARGIN) {
-			const newLogicalH = this.logicalHeight + this.EXPAND_AMOUNT;
-			this.animateHeight(newLogicalH);
+			this.expandSection();
 		}
 	}
 

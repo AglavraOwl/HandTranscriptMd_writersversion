@@ -245,6 +245,36 @@
 }
 
 /* --- Area canvas (editing) --- */
+/* canvasArea: contenitore posizionato per lo scroll wrap + bottone overlay.
+   flex:1/min-height:0 per non rompere il layout flex-column dell'editor. */
+.hwm_canvas-area {
+	position: relative;
+	flex: 1;
+	min-height: 0;
+	display: flex;
+}
+
+/* Bottone overlay "aggiungi sezione sotto": in alto a destra (non in basso,
+   per evitare tocchi accidentali col pennino mentre si scrive) */
+.hwm_add-section-btn {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	width: 36px;
+	height: 36px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0, 0, 0, 0.35);
+	color: #ffffff;
+	border-radius: 50%;
+	cursor: pointer;
+	z-index: 5;
+	transition: background 0.15s;
+}
+.hwm_add-section-btn:hover {
+	background: rgba(0, 0, 0, 0.55);
+}
 .hwm_canvas-wrap {
 	width: 100%;
 	/* Centra il canvas orizzontalmente quando il modal/tab è più largo

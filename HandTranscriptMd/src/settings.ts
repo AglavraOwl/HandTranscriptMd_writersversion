@@ -19,6 +19,7 @@ export interface HandwritingSettings {
 	debugMode: boolean;           // mostra Notice di debug per eventi IME/touch
 	uiLanguage: string;           // lingua dell'interfaccia impostazioni ('auto' = segue sistema)
 	continuousMode: boolean;      // unisce tutte le righe in un unico paragrafo, //Z per andare a capo
+	autoScrollOnExpand: boolean;  // scorrimento automatico quando l'area di scrittura si espande
 }
 
 // Colori predefiniti per le modalità light e dark
@@ -91,6 +92,7 @@ export const DEFAULT_SETTINGS: HandwritingSettings = {
 	debugMode: false,
 	uiLanguage: 'auto',           // default: segue la lingua di sistema di Obsidian
 	continuousMode: false,
+	autoScrollOnExpand: true,     // default: comportamento attuale (scorre sempre)
 };
 
 export class HandwritingSettingTab extends PluginSettingTab {
@@ -188,6 +190,17 @@ export class HandwritingSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 					// Notifica pannelli (dark class) e SVG attivi (remap colori)
 					this.plugin.notifyBgModeChange();
+				}));
+
+		// --- Scorrimento automatico ---
+		new Setting(containerEl)
+			.setName(t('auto_scroll_name'))
+			.setDesc(t('auto_scroll_desc'))
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.autoScrollOnExpand)
+				.onChange(async (value) => {
+					this.plugin.settings.autoScrollOnExpand = value;
+					await this.plugin.saveSettings();
 				}));
 
 		// --- Chiave API Gemini ---
