@@ -323,7 +323,8 @@ export class DrawingEditorView extends ItemView {
 	private embedId = '';
 	private svgPath = '';
 	private sourcePath = '';
-	private saveTimer: ReturnType<typeof setTimeout> | null = null;
+	// number (non NodeJS.Timeout): window.setTimeout in un contesto DOM ritorna un id numerico
+	private saveTimer: number | null = null;
 	// Listener per aggiornare la classe dark al cambio bgMode
 	private bgModeListener: ((bgMode: string) => void) | null = null;
 	// ResizeObserver per adattare il canvas al layout reale (inclusa rotazione schermo)
@@ -489,7 +490,8 @@ export class DrawingModal extends Modal {
 	private svgPath: string;
 	private sourcePath: string;
 	private canvas: DrawingCanvas | null = null;
-	private saveTimer: ReturnType<typeof setTimeout> | null = null;
+	// number (non NodeJS.Timeout): window.setTimeout in un contesto DOM ritorna un id numerico
+	private saveTimer: number | null = null;
 	// Listener per aggiornare la classe dark al cambio bgMode
 	private bgModeListener: ((bgMode: string) => void) | null = null;
 	// Chiude il modal al resize finestra (evita bug canvas su Windows)

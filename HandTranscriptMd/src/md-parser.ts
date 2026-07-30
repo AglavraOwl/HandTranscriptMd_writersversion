@@ -120,7 +120,7 @@ function convertPipeTables(text: string): string {
 	let inCodeBlock = false;
 
 	while (i < lines.length) {
-		const line = lines[i];
+		const line = lines[i]!; // i < lines.length garantisce l'esistenza dell'elemento
 
 		// Rispetta i blocchi codice anche in questa fase
 		if (line.trim().startsWith('```')) {
@@ -139,8 +139,8 @@ function convertPipeTables(text: string): string {
 			// Raccoglie righe consecutive con pipe, saltando eventuali separatori già presenti
 			const block: string[] = [line];
 			let j = i + 1;
-			while (j < lines.length && lines[j].includes('|') && lines[j].trim() !== '') {
-				if (!/^\|?\s*:?-+:?\s*\|/.test(lines[j])) block.push(lines[j]);
+			while (j < lines.length && lines[j]!.includes('|') && lines[j]!.trim() !== '') {
+				if (!/^\|?\s*:?-+:?\s*\|/.test(lines[j]!)) block.push(lines[j]!);
 				j++;
 			}
 
@@ -154,9 +154,9 @@ function convertPipeTables(text: string): string {
 					return parts.slice(start, end);
 				});
 				const cols      = Math.max(...rows.map(r => r.length));
-				const headerRow = '| ' + rows[0].join(' | ') + ' |';
+				const headerRow = '| ' + rows[0]!.join(' | ') + ' |';
 				// Riga separatore compatta: |---|---|
-				const sepRow    = '|' + rows[0].map(() => '---|').join('');
+				const sepRow    = '|' + rows[0]!.map(() => '---|').join('');
 				const dataRows  = rows.slice(1).map(row => {
 					const cells = Array.from({ length: cols }, (_, k) => row[k] ?? '');
 					return '| ' + cells.join(' | ') + ' |';
@@ -192,7 +192,7 @@ export function expandKeywords(text: string, fnStart = 1): string {
 	let i  = 0;
 
 	while (i < lines.length) {
-		const line    = lines[i];
+		const line    = lines[i]!; // i < lines.length garantisce l'esistenza dell'elemento
 		const trimmed = line.trim();
 
 		// Pattern: //KEYWORD contenuto  oppure  //KEYWORD: contenuto  (colon opzionale)
@@ -206,7 +206,7 @@ export function expandKeywords(text: string, fnStart = 1): string {
 			continue;
 		}
 
-		const keyword = kw[1].toUpperCase();       // nome keyword normalizzato
+		const keyword = kw[1]!.toUpperCase();       // nome keyword normalizzato (match riuscito garantisce kw[1])
 		const content = (kw[2] ?? '').trim();      // contenuto dopo la keyword
 
 		switch (keyword) {
@@ -239,8 +239,9 @@ export function expandKeywords(text: string, fnStart = 1): string {
 				// Offset opzionale: //NUMLIST 3 item1, item2 -> parte da 3
 				let offset = 1;
 				let items = content;
-				const offsetMatch = content.match(/^(\d+)\s+(.*)/s);
-				if (offsetMatch) { offset = parseInt(offsetMatch[1]); items = offsetMatch[2]; }
+				// Nessun flag "s": content è sempre una singola riga (senza \n), quindi "." già cattura tutto
+				const offsetMatch = content.match(/^(\d+)\s+(.*)/);
+				if (offsetMatch) { offset = parseInt(offsetMatch[1]!); items = offsetMatch[2]!; }
 				const [fullItems, newI] = collectContinuation(lines, i + 1, items);
 				i = newI;
 				out.push(buildNumList(fullItems, offset));
@@ -267,7 +268,7 @@ export function expandKeywords(text: string, fnStart = 1): string {
 				const bodyLines: string[] = [];
 				// Raccoglie righe del corpo fino alla prima vuota o nuova keyword
 				while (i < lines.length) {
-					const bl = lines[i].trim();
+					const bl = lines[i]!.trim();
 					if (!bl || bl.startsWith('//')) break;
 					bodyLines.push(bl);
 					i++;
@@ -329,8 +330,8 @@ export function expandKeywords(text: string, fnStart = 1): string {
 				i++;
 				const codeLines: string[] = [];
 				// Raccoglie righe fino alla prima riga vuota o fine testo
-				while (i < lines.length && lines[i].trim() !== '') {
-					codeLines.push(lines[i]);
+				while (i < lines.length && lines[i]!.trim() !== '') {
+					codeLines.push(lines[i]!);
 					i++;
 				}
 				out.push(`\`\`\`${lang}\n${codeLines.join('\n')}\n\`\`\``);
@@ -341,8 +342,8 @@ export function expandKeywords(text: string, fnStart = 1): string {
 			case 'MATHBLOCK': {
 				i++;
 				const mathLines: string[] = [];
-				while (i < lines.length && lines[i].trim() !== '') {
-					mathLines.push(lines[i]);
+				while (i < lines.length && lines[i]!.trim() !== '') {
+					mathLines.push(lines[i]!);
 					i++;
 				}
 				out.push(`$$\n${mathLines.join('\n')}\n$$`);
@@ -360,7 +361,7 @@ export function expandKeywords(text: string, fnStart = 1): string {
 				const rows: string[][] = [];
 				i = startI;
 				while (i < lines.length) {
-					const rowLine = lines[i].trim();
+					const rowLine = lines[i]!.trim();
 					// Chiusura esplicita //TABLE
 					if (/^\/\/TABLE/i.test(rowLine)) { i++; break; }
 					// Qualsiasi altra keyword chiude implicitamente senza consumarla
@@ -505,7 +506,7 @@ function collectContinuation(lines: string[], nextI: number, content: string): [
 	let i = nextI;
 	// Finché l'ultima riga raccolta finisce con virgola, aggiungi la riga successiva
 	while (full.trimEnd().endsWith(',') && i < lines.length) {
-		const next = lines[i].trim();
+		const next = lines[i]!.trim();
 		// Riga vuota o nuova keyword → stop
 		if (!next || next.startsWith('//')) break;
 		full = full.trimEnd() + ' ' + next;

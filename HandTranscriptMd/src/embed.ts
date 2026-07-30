@@ -58,8 +58,8 @@ export function registerEmbed(plugin: HandwritingPlugin) {
 			// Legge dimensioni reali dal viewBox per preservare l'altezza raggiunta con auto-expand.
 			// Usare plugin.settings.canvasHeight causerebbe il "collasso" degli SVG cresciuti.
 			const dimMatch = content.match(/viewBox="0 0 (\d+) (\d+)"/);
-			const svgWidth = dimMatch ? parseInt(dimMatch[1]) : plugin.settings.canvasWidth;
-			const svgHeight = dimMatch ? parseInt(dimMatch[2]) : plugin.settings.canvasHeight;
+			const svgWidth = dimMatch ? parseInt(dimMatch[1]!) : plugin.settings.canvasWidth;
+			const svgHeight = dimMatch ? parseInt(dimMatch[2]!) : plugin.settings.canvasHeight;
 			const newSvg = strokesToSvg(
 				remapped,
 				svgWidth,
