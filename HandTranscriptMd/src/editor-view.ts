@@ -32,6 +32,47 @@ function codeBlockRegex(embedId: string): RegExp {
 	return new RegExp('\\n?```handwriting\\n.*?"id"\\s*:\\s*"' + esc + '".*?\\n```\\n?', 's');
 }
 
+// Un vault.modify() su un file .md forza Obsidian a ricostruire la vista
+// CM6 in TUTTI i leaf che mostrano quel file. Se il leaf sorgente non è
+// quello attivo (es. tab centrale mentre si scrive da un'altra tab/modal),
+// Obsidian può perdere il tracciamento del leaf attivo durante il
+// re-render e "scivolare" sulla tab successiva. Ripristiniamo esplicitamente
+// il focus sul leaf del file modificato, invece di fidarci del recovery
+// interno di Obsidian.
+export function preserveFocusAcrossModify(plugin: HandwritingPlugin, srcPath: string): void {
+	const ws = plugin.app.workspace;
+	let focusDone = false;
+
+	const doFocus = () => {
+		if (focusDone) return;
+		focusDone = true;
+		// Aspetta che il re-render CM6 innescato da vault.modify sia completo
+		// prima di rimettere il focus, altrimenti il click/focus si perde.
+		window.setTimeout(() => {
+			let mdView = ws.getActiveViewOfType(MarkdownView);
+			if (!mdView || mdView.file?.path !== srcPath) {
+				const leaf = ws.getLeavesOfType('markdown')
+					.find(l => (l.view as MarkdownView).file?.path === srcPath);
+				if (leaf) ws.setActiveLeaf(leaf, { focus: true });
+				mdView = ws.getActiveViewOfType(MarkdownView);
+			}
+			const cm = mdView?.contentEl.querySelector<HTMLElement>('.cm-content');
+			cm?.focus();
+		}, 300);
+	};
+
+	// Registra il listener PRIMA di modificare il file, così non perdiamo l'evento.
+	const ref = plugin.app.vault.on('modify', (file) => {
+		if (file.path === srcPath) {
+			plugin.app.vault.offref(ref);
+			doFocus();
+		}
+	});
+
+	// Fallback: se vault.modify non spara entro 3s (caso anomalo), forza comunque il focus.
+	window.setTimeout(() => { plugin.app.vault.offref(ref); doFocus(); }, 3000);
+}
+
 // Applica una sostituzione sul file .md.
 // Prova prima il formato wiki ![[svg]], poi il code block legacy come fallback.
 async function replaceInMdFile(
@@ -46,7 +87,10 @@ async function replaceInMdFile(
 	const content = await plugin.app.vault.read(mdFile);
 	let updated = content.replace(wikiEmbedRegex(svgPath), replacement);
 	if (updated === content) updated = content.replace(codeBlockRegex(embedId), replacement);
-	if (updated !== content) await plugin.app.vault.modify(mdFile, updated);
+	if (updated !== content) {
+		preserveFocusAcrossModify(plugin, mdPath);
+		await plugin.app.vault.modify(mdFile, updated);
+	}
 }
 
 // Carica i tratti da un file SVG nel vault. Restituisce anche le dimensioni del viewBox.
@@ -628,43 +672,11 @@ export class DrawingModal extends Modal {
 		if (!await this.showDeleteConfirm()) return;
 		if (this.canvas) { this.canvas.destroy(); this.canvas = null; }
 
-		const srcPath = this.sourcePath;
-		const ws = this.app.workspace;
-		let focusDone = false;
-
-		// Funzione di focus: aspetta 300ms dopo che vault.modify ha sparato,
-		// in modo da dare all'editor il tempo di completare il re-render del documento.
-		const doFocus = () => {
-			if (focusDone) return;
-			focusDone = true;
-			window.setTimeout(() => {
-				let mdView = ws.getActiveViewOfType(MarkdownView);
-				if (!mdView || mdView.file?.path !== srcPath) {
-					const leaf = ws.getLeavesOfType('markdown')
-						.find(l => (l.view as MarkdownView).file?.path === srcPath);
-					if (leaf) ws.setActiveLeaf(leaf, { focus: true });
-					mdView = ws.getActiveViewOfType(MarkdownView);
-				}
-				// Focus diretto sul contenteditable CM6
-				const cm = mdView?.contentEl.querySelector<HTMLElement>('.cm-content');
-				cm?.focus();
-			}, 300);
-		};
-
-		// Registra il listener PRIMA di modificare il file, così non perdiamo l'evento.
-		const ref = this.app.vault.on('modify', (file) => {
-			if (file.path === srcPath) {
-				this.app.vault.offref(ref);
-				doFocus();
-			}
-		});
-
-		await replaceInMdFile(srcPath, this.svgPath, this.embedId, '\n', this.plugin);
+		// Il ripristino del focus sul leaf sorgente è ora gestito da
+		// replaceInMdFile() stesso (vedi preserveFocusAcrossModify).
+		await replaceInMdFile(this.sourcePath, this.svgPath, this.embedId, '\n', this.plugin);
 		const svgFile = this.app.vault.getAbstractFileByPath(this.svgPath);
 		if (svgFile instanceof TFile) await this.app.fileManager.trashFile(svgFile);
-
-		// Fallback: se vault.modify non spara entro 3s (caso anomalo), forza comunque il focus
-		window.setTimeout(() => { this.app.vault.offref(ref); doFocus(); }, 3000);
 
 		this.close();
 		new Notice(t('notice_deleted'));

@@ -25,7 +25,7 @@ import { strokesToSvg, parseSvgStrokes, generateId, svgToBase64Png, archiveSvgFi
 import { getEffectiveBgColor, getEffectiveLineColor, remapStrokeColor, BgMode, resolveIsDark } from './settings';
 import { getRecognizer } from './recognizer';
 import { parseHandwritingToMarkdown } from './md-parser';
-import { VIEW_TYPE_HANDWRITING, DrawingEditorView, DrawingModal } from './editor-view';
+import { VIEW_TYPE_HANDWRITING, DrawingEditorView, DrawingModal, preserveFocusAcrossModify } from './editor-view';
 
 // Dati JSON salvati dentro il code block ```handwriting (formato legacy)
 interface EmbedData {
@@ -523,7 +523,10 @@ async function replaceWikiEmbedWithMarkdown(
 
 	const content = await plugin.app.vault.read(mdFile);
 	const updated = content.replace(wikiEmbedRegex(svgPath), '\n' + markdown + '\n');
-	if (updated !== content) await plugin.app.vault.modify(mdFile, updated);
+	if (updated !== content) {
+		preserveFocusAcrossModify(plugin, sourcePath);
+		await plugin.app.vault.modify(mdFile, updated);
+	}
 }
 
 async function replaceEmbedWithMarkdown(
@@ -537,7 +540,10 @@ async function replaceEmbedWithMarkdown(
 
 	const content = await plugin.app.vault.read(mdFile);
 	const updated = content.replace(codeBlockRegex(data.id), '\n' + markdown + '\n');
-	if (updated !== content) await plugin.app.vault.modify(mdFile, updated);
+	if (updated !== content) {
+		preserveFocusAcrossModify(plugin, ctx.sourcePath);
+		await plugin.app.vault.modify(mdFile, updated);
+	}
 }
 
 /* =============================================
