@@ -52,7 +52,7 @@ export class DrawingCanvas {
 	// Flag per sapere se la gomma ha modificato qualcosa durante un drag
 	private eraserChanged = false;
 	// Callback invocato quando l'altezza del canvas cambia (auto-expand)
-	private resizeCb: (() => void) | null = null;
+	private resizeCb: ((forced: boolean) => void) | null = null;
 
 	// Altezza di default delle settings (usata per reset su clear)
 	private defaultHeight: number;
@@ -65,6 +65,9 @@ export class DrawingCanvas {
 	// Auto-expand
 	private readonly EXPAND_MARGIN = 40;
 	private readonly EXPAND_AMOUNT = 150;
+	// true durante un'espansione forzata (bottone manuale): letto da resizeCb per far
+	// scrollare l'overlay anche con autoScrollOnExpand disattivato
+	private forceScroll = false;
 
 	private animFrameId: number | null = null;
 
@@ -132,13 +135,17 @@ export class DrawingCanvas {
 	/* --- API pubblica --- */
 
 	onChange(cb: () => void) { this.changeCb = cb; }
-	// Registra callback per quando l'altezza cambia (utile per auto-scroll nell'overlay)
-	onResize(cb: () => void) { this.resizeCb = cb; }
+	// Registra callback per quando l'altezza cambia (utile per auto-scroll nell'overlay).
+	// forced=true indica un'espansione richiesta esplicitamente (bottone manuale): l'overlay
+	// dovrebbe scrollare comunque, anche se l'impostazione autoScrollOnExpand è disattivata.
+	onResize(cb: (forced: boolean) => void) { this.resizeCb = cb; }
 
 	// Aggiunge una sezione di scrittura in fondo al canvas. Chiamato sia
-	// dall'auto-expand (pennino vicino al fondo) sia dal bottone manuale in overlay.
-	expandSection() {
+	// dall'auto-expand (pennino vicino al fondo, forceScroll=false) sia dal
+	// bottone manuale in overlay (forceScroll=true, scrolla sempre a fine espansione).
+	expandSection(forceScroll = false) {
 		if (this.animFrameId !== null) return;
+		this.forceScroll = forceScroll;
 		this.animateHeight(this.logicalHeight + this.EXPAND_AMOUNT);
 	}
 
@@ -420,11 +427,13 @@ export class DrawingCanvas {
 				this.drawFullStroke(this.currentStroke);
 			}
 			// Notifica chi ascolta (overlay auto-scroll)
-			this.resizeCb?.();
+			this.resizeCb?.(this.forceScroll);
 
 			if (progress < 1) {
 				this.animFrameId = window.requestAnimationFrame(step);
 			} else {
+				// Reset dopo l'ultimo frame (che ha già ricevuto forceScroll=true se richiesto)
+				this.forceScroll = false;
 				this.animFrameId = null;
 			}
 		};

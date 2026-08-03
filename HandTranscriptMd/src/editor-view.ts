@@ -314,8 +314,10 @@ async function buildEditorUI(opts: {
 
 	// Auto-scroll quando il canvas si espande, ma solo se non si sta disegnando.
 	// Durante il disegno, lo scroll sposterebbe il canvas e le coordinate salterebbero.
-	canvas.onResize(() => {
-		if (!canvas.isPointerDown() && plugin.settings.autoScrollOnExpand) {
+	// forced=true (bottone manuale "aggiungi sezione") scrolla comunque, anche con
+	// l'impostazione autoScrollOnExpand disattivata: è un'azione esplicita dell'utente.
+	canvas.onResize((forced) => {
+		if (!canvas.isPointerDown() && (plugin.settings.autoScrollOnExpand || forced)) {
 			scrollWrap.scrollTop = scrollWrap.scrollHeight;
 		}
 	});
@@ -346,7 +348,7 @@ async function buildEditorUI(opts: {
 			cv.setColor(colors[i]!);
 		});
 	}
-	addSectionBtn.addEventListener('click', () => cv.expandSection());
+	addSectionBtn.addEventListener('click', () => cv.expandSection(true));
 	undoBtn.addEventListener('click', () => cv.undo());
 	redoBtn.addEventListener('click', () => cv.redo());
 	clearBtn.addEventListener('click', () => cv.clear());
