@@ -267,6 +267,7 @@ export class HandwritingSettingTab extends PluginSettingTab {
 			['//BI',              `//BI ${X}`,                `***${X}***`],
 			['//S / //STRIKE',    `//S ${X}`,                 `~~${X}~~`],
 			['//HL',              `//HL ${X}`,                `==${X}==`],
+			['//COM',             `//COM ${X} //COM`,        `%%${X}%%`],
 			['//CODE',            `//CODE ${X}`,              `\`${X}\``],
 			['//CODEBLOCK',       '//CODEBLOCK js',           '```js\n...\n```'],
 			['//LIST',            '//LIST a, b, c',           '- a\n- b\n- c'],

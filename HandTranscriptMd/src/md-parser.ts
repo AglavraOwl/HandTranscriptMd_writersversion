@@ -57,7 +57,20 @@ export function normalizeMarkdownSymbols(rawText: string): string {
 /**
  * Applica le correzioni su una singola riga (non dentro blocchi codice).
  */
+// //COM ... //COM → %%...%% (commento nascosto Obsidian). Scorciatoia perché "%" è lento
+// da scrivere a mano: %% è già simmetrico (stesso token per apertura/chiusura), quindi ogni
+// occorrenza di //COM diventa semplicemente %%. Accetta sia lettere latine che i corrispettivi
+// cirillici visivamente identici (С, О, М) perché l'OCR può trascriverli nell'uno o nell'altro
+// alfabeto se il resto del testo è in russo — a quel punto un //COM scritto in latino potrebbe
+// uscire come //СОМ. serve il flag "u" per \p{L} (lettera Unicode di qualsiasi alfabeto): il
+// confine di parola \b standard è ASCII-only e non funziona correttamente con testo cirillico.
+const COM_MARKER = /\/\/\s*[CcСс][OoОо][MmМм](?!\p{L})/gu;
+
 function normalizeLine(line: string): string {
+	// Sostituzione //COM eseguita PRIMA del guard sotto: se la riga inizia con //COM va comunque
+	// convertita in %%, non lasciata intatta come farebbe il guard per le righe //KEYWORD
+	line = line.replace(COM_MARKER, '%%');
+
 	// Righe keyword //KEYWORD o // KEYWORD (con spazio) — non modificare, le gestisce expandKeywords
 	if (/^\/\/\s*[A-Za-z0-9_]/i.test(line.trim())) return line;
 
@@ -437,9 +450,12 @@ export function collapseContinuousLines(rawText: string): string {
 		// Riga vuota nel testo grezzo: ignorata, solo //Z crea un a capo
 		if (line === '') continue;
 
-		// Altre keyword //KEYWORD (diverse da //Z): restano su una riga propria
+		// Altre keyword //KEYWORD (diverse da //Z e //COM): restano su una riga propria.
+		// //COM è escluso perché, come //Z, può comparire ovunque nel testo scorrevole
+		// (è un marcatore inline per il commento nascosto %%...%%, non un comando a sé stante)
+		// e va quindi unito al paragrafo come testo normale, non isolato su una riga propria.
 		const kw = line.match(/^\/\/\s*([A-Za-z0-9_]+)/i);
-		if (kw && kw[1]!.toUpperCase() !== 'Z') {
+		if (kw && !['Z', 'COM'].includes(kw[1]!.toUpperCase())) {
 			flush();
 			out.push(line);
 			continue;

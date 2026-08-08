@@ -8,7 +8,7 @@
    un helper expect/toBe inline.
    ============================================= */
 
-import { normalizeMarkdownSymbols as normalize, expandKeywords as expand, parseHandwritingToMarkdown as parse } from './md-parser.js';
+import { normalizeMarkdownSymbols as normalize, expandKeywords as expand, parseHandwritingToMarkdown as parse, collapseContinuousLines as collapse } from './md-parser.js';
 
 // --- Mini test runner ---
 
@@ -97,6 +97,27 @@ describe('normalizeMarkdownSymbols — blocchi codice protetti', () => {
 	// Il contenuto dentro ``` non deve essere modificato
 	expect(normalize('```\n#non titolo\n```')).toBe('```\n#non titolo\n```');
 	expect(normalize('```js\n-nolista\n```')).toBe('```js\n-nolista\n```');
+});
+
+describe('normalizeMarkdownSymbols — //COM inline (scorciatoia per %%...%%)', () => {
+	// Uso tipico: marcatore inline in mezzo a una frase, non su una riga a sé.
+	// Lo spazio separatore tra //COM e la parola successiva resta adiacente a %%
+	// (irrilevante: %% spazio o non spazio rende identico come commento nascosto in Obsidian)
+	expect(normalize('Frase //COM nota nascosta //COM continua')).toBe('Frase %% nota nascosta %% continua');
+	// Case-insensitive e spazio opzionale dopo //
+	expect(normalize('a // com nota // COM b')).toBe('a %% nota %% b');
+	// Non deve confondersi con altre keyword che iniziano per C (nessun confine di parola dopo C)
+	expect(normalize('//CODE testo')).toBe('//CODE testo'); // riga-keyword intera: lasciata a expandKeywords
+	expect(normalize('testo //CODEBLOCK js')).toBe('testo //CODEBLOCK js');
+	// Omoglifi cirillici (С, О, М) — l'OCR può trascrivere così in un testo prevalentemente russo
+	expect(normalize('фраза //СОМ скрыто //СОМ конец')).toBe('фраза %% скрыто %% конец');
+	// Non dentro un blocco codice
+	expect(normalize('```\n//COM testo //COM\n```')).toBe('```\n//COM testo //COM\n```');
+});
+
+describe('collapseContinuousLines — //COM resta inline nel paragrafo (non isolato come le altre keyword)', () => {
+	expect(collapse('Frase\n//COM nota\ncontinua')).toBe('Frase //COM nota continua');
+	expect(collapse('Prima //Z //COM nota //COM dopo')).toBe('Prima\n\n//COM nota //COM dopo');
 });
 
 // =============================================================================
