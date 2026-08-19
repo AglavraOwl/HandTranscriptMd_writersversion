@@ -1,6 +1,8 @@
 {
 	"svg_folder_name": "SVG folder",
 	"svg_folder_desc": "Vault folder where drawing SVG files are saved",
+	"organize_by_note_name": "Organize SVGs by note",
+	"organize_by_note_desc": "When on, SVGs are saved in a subfolder mirroring the note's path in the vault (e.g. \"Projects/Book/Chapter 1\"), instead of all together in the SVG folder. Prevents mixing drawings from notes that share the same title.",
 	"canvas_width_name": "Canvas width",
 	"canvas_width_desc": "Horizontal canvas resolution in pixels",
 	"canvas_height_name": "Canvas height",

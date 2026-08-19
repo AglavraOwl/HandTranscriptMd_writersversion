@@ -8,6 +8,8 @@
 	"ui_language_auto": "自動（システム言語）",
 	"svg_folder_name": "SVGフォルダ",
 	"svg_folder_desc": "描画SVGファイルを保存するvaultのフォルダ",
+	"organize_by_note_name": "ノートごとにSVGを整理",
+	"organize_by_note_desc": "オンにすると、SVGはvault内のノートのパスを反映したサブフォルダ(例:「プロジェクト/本/第1章」)に保存され、SVGフォルダにまとめて保存されなくなります。同じタイトルのノートの描画が混ざるのを防ぎます。",
 	"canvas_width_name": "キャンバスの幅",
 	"canvas_width_desc": "キャンバスの水平解像度（ピクセル）",
 	"canvas_height_name": "キャンバスの高さ",

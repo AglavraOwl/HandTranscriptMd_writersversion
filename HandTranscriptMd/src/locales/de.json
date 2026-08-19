@@ -8,6 +8,8 @@
 	"ui_language_auto": "Automatisch (Systemsprache)",
 	"svg_folder_name": "SVG-Ordner",
 	"svg_folder_desc": "Ordner im Vault, in dem SVG-Zeichnungsdateien gespeichert werden",
+	"organize_by_note_name": "SVGs nach Notiz organisieren",
+	"organize_by_note_desc": "Wenn aktiviert, werden SVGs in einem Unterordner gespeichert, der den Pfad der Notiz im Vault widerspiegelt (z. B. \"Projekte/Buch/Kapitel 1\"), anstatt alle zusammen im SVG-Ordner. Verhindert, dass Zeichnungen von Notizen mit demselben Titel vermischt werden.",
 	"canvas_width_name": "Canvas-Breite",
 	"canvas_width_desc": "Horizontale Canvas-Auflösung in Pixeln",
 	"canvas_height_name": "Canvas-Höhe",

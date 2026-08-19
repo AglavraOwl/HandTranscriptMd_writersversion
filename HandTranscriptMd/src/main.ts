@@ -189,16 +189,23 @@ class SvgReferenceSuggest extends FuzzySuggestModal<TFile> {
 		this.setPlaceholder('Cerca SVG...');
 	}
 
-	// Restituisce tutti gli SVG nella cartella impostata (esclusa _converted)
+	// Restituisce tutti gli SVG nella cartella impostata (esclusa _converted),
+	// cercando ricorsivamente per includere le sottocartelle create quando
+	// "Organizza per nota" è attivo.
 	getItems(): TFile[] {
 		const folder = this.app.vault.getAbstractFileByPath(this.plugin.settings.svgFolder);
 		if (!(folder instanceof TFolder)) return [];
-		return folder.children.filter(
-			(f): f is TFile =>
-				f instanceof TFile &&
-				f.extension === 'svg' &&
-				!f.path.includes('/_converted/')
-		);
+		const result: TFile[] = [];
+		const walk = (f: TFolder) => {
+			for (const child of f.children) {
+				if (child instanceof TFolder) walk(child);
+				else if (child instanceof TFile && child.extension === 'svg' && !child.path.includes('/_converted/')) {
+					result.push(child);
+				}
+			}
+		};
+		walk(folder);
+		return result;
 	}
 
 	// Testo usato per il fuzzy-match (nome file)

@@ -8,6 +8,8 @@
 	"ui_language_auto": "Automatique (langue du système)",
 	"svg_folder_name": "Dossier SVG",
 	"svg_folder_desc": "Dossier dans le vault où les fichiers SVG des dessins sont enregistrés",
+	"organize_by_note_name": "Organiser les SVG par note",
+	"organize_by_note_desc": "Lorsque activé, les SVG sont enregistrés dans un sous-dossier reflétant le chemin de la note dans le vault (ex. \"Projets/Livre/Chapitre 1\"), au lieu d'être tous regroupés dans le dossier SVG. Évite de mélanger les dessins de notes portant le même titre.",
 	"canvas_width_name": "Largeur du canvas",
 	"canvas_width_desc": "Résolution horizontale du canvas en pixels",
 	"canvas_height_name": "Hauteur du canvas",

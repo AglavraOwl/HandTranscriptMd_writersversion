@@ -8,6 +8,8 @@
 	"ui_language_auto": "Automático (idioma do sistema)",
 	"svg_folder_name": "Pasta SVG",
 	"svg_folder_desc": "Pasta no vault onde os arquivos SVG dos desenhos são salvos",
+	"organize_by_note_name": "Organizar SVGs por nota",
+	"organize_by_note_desc": "Quando ativado, os SVGs são salvos em uma subpasta que reflete o caminho da nota no vault (ex. \"Projetos/Livro/Capítulo 1\"), em vez de ficarem todos juntos na pasta SVG. Evita misturar desenhos de notas com o mesmo título.",
 	"canvas_width_name": "Largura do canvas",
 	"canvas_width_desc": "Resolução horizontal do canvas em pixels",
 	"canvas_height_name": "Altura do canvas",

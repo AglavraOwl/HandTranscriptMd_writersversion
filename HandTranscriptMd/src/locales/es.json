@@ -8,6 +8,8 @@
 	"ui_language_auto": "Automático (idioma del sistema)",
 	"svg_folder_name": "Carpeta SVG",
 	"svg_folder_desc": "Carpeta en el vault donde se guardan los archivos SVG de los dibujos",
+	"organize_by_note_name": "Organizar SVG por nota",
+	"organize_by_note_desc": "Cuando está activado, los SVG se guardan en una subcarpeta que refleja la ruta de la nota en el vault (p. ej. \"Proyectos/Libro/Capítulo 1\"), en lugar de estar todos juntos en la carpeta SVG. Evita mezclar dibujos de notas con el mismo título.",
 	"canvas_width_name": "Ancho del canvas",
 	"canvas_width_desc": "Resolución horizontal del canvas en píxeles",
 	"canvas_height_name": "Alto del canvas",

@@ -1,6 +1,8 @@
 {
 	"svg_folder_name": "Cartella SVG",
 	"svg_folder_desc": "Cartella nel vault dove vengono salvati i file SVG dei disegni",
+	"organize_by_note_name": "Organizza SVG per nota",
+	"organize_by_note_desc": "Se attivo, gli SVG vengono salvati in una sottocartella che rispecchia il percorso della nota nel vault (es. \"Progetti/Libro/Capitolo 1\"), invece di stare tutti insieme nella cartella SVG. Evita di mescolare disegni di note con lo stesso titolo.",
 	"canvas_width_name": "Larghezza canvas",
 	"canvas_width_desc": "Risoluzione orizzontale del canvas in pixel",
 	"canvas_height_name": "Altezza canvas",

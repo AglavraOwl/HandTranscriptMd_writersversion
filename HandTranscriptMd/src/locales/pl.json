@@ -8,6 +8,8 @@
 	"ui_language_auto": "Automatyczny (język systemu)",
 	"svg_folder_name": "Folder SVG",
 	"svg_folder_desc": "Folder w vaulcie, gdzie zapisywane są pliki SVG rysunków",
+	"organize_by_note_name": "Organizuj SVG według notatki",
+	"organize_by_note_desc": "Gdy włączone, pliki SVG są zapisywane w podfolderze odzwierciedlającym ścieżkę notatki w vaulcie (np. \"Projekty/Książka/Rozdział 1\"), zamiast wszystkich razem w folderze SVG. Zapobiega mieszaniu rysunków z notatek o tej samej nazwie.",
 	"canvas_width_name": "Szerokość płótna",
 	"canvas_width_desc": "Pozioma rozdzielczość płótna w pikselach",
 	"canvas_height_name": "Wysokość płótna",

@@ -11,6 +11,7 @@ export type BgMode = 'light' | 'dark' | 'auto';
 
 export interface HandwritingSettings {
 	svgFolder: string;            // cartella dove salvare i file SVG
+	organizeByNote: boolean;      // se true, rispecchia il percorso della nota come sottocartella sotto svgFolder
 	canvasWidth: number;          // larghezza interna del canvas (px)
 	canvasHeight: number;         // altezza interna del canvas (px)
 	bgMode: BgMode;               // modalità sfondo
@@ -84,6 +85,7 @@ export function remapStrokeColor(color: string, bgMode: BgMode): string {
 
 export const DEFAULT_SETTINGS: HandwritingSettings = {
 	svgFolder: '_handwriting',
+	organizeByNote: false,        // default: comportamento attuale (cartella piatta)
 	canvasWidth: 800,
 	canvasHeight: 300,
 	bgMode: 'auto',               // default: segue automaticamente il tema di Obsidian
@@ -145,6 +147,17 @@ export class HandwritingSettingTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.svgFolder)
 				.onChange(async (value) => {
 					this.plugin.settings.svgFolder = value || '_handwriting';
+					await this.plugin.saveSettings();
+				}));
+
+		// --- Organizza per nota ---
+		new Setting(containerEl)
+			.setName(t('organize_by_note_name'))
+			.setDesc(t('organize_by_note_desc'))
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.organizeByNote)
+				.onChange(async (value) => {
+					this.plugin.settings.organizeByNote = value;
 					await this.plugin.saveSettings();
 				}));
 

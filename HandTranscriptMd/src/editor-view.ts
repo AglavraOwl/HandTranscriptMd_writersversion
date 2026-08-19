@@ -8,7 +8,7 @@
 import { ItemView, WorkspaceLeaf, TFile, Notice, Platform, Modal, App, MarkdownView, setIcon, ViewStateResult } from 'obsidian';
 import type HandwritingPlugin from './main';
 import { DrawingCanvas, Stroke } from './drawing-canvas';
-import { strokesToSvg, parseSvgStrokes, svgToBase64Png, archiveSvgFile } from './svg-utils';
+import { strokesToSvg, parseSvgStrokes, svgToBase64Png, archiveSvgFile, ensureFolderExists } from './svg-utils';
 import { getEffectiveBgColor, getEffectiveLineColor, remapStrokeColor, LIGHT_COLORS, DARK_COLORS, resolveIsDark, BgMode } from './settings';
 import { getRecognizer } from './recognizer';
 import { parseHandwritingToMarkdown } from './md-parser';
@@ -123,9 +123,7 @@ async function saveSvgToDisk(
 		canvas.getBgColor(), canvas.getLineColor()
 	);
 	const folder = svgPath.substring(0, svgPath.lastIndexOf('/'));
-	if (folder && !plugin.app.vault.getAbstractFileByPath(folder)) {
-		await plugin.app.vault.createFolder(folder);
-	}
+	if (folder) await ensureFolderExists(folder, plugin);
 	const existing = plugin.app.vault.getAbstractFileByPath(svgPath);
 	if (existing instanceof TFile) {
 		await plugin.app.vault.modify(existing, svg);

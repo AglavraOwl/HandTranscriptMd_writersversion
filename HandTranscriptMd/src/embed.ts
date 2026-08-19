@@ -21,7 +21,7 @@ import {
 import type HandwritingPlugin from './main';
 import { t, type I18nKey } from './i18n';
 import { Stroke } from './drawing-canvas';
-import { strokesToSvg, parseSvgStrokes, generateId, svgToBase64Png, archiveSvgFile } from './svg-utils';
+import { strokesToSvg, parseSvgStrokes, generateId, svgToBase64Png, archiveSvgFile, getSvgFolderForNote, ensureFolderExists } from './svg-utils';
 import { getEffectiveBgColor, getEffectiveLineColor, remapStrokeColor, BgMode, resolveIsDark } from './settings';
 import { getRecognizer } from './recognizer';
 import { parseHandwritingToMarkdown } from './md-parser';
@@ -560,7 +560,8 @@ export async function insertHandwritingBlock(plugin: HandwritingPlugin) {
 
 	const editor = view.editor;
 	const id = generateId();
-	const svgPath = `${plugin.settings.svgFolder}/${id}.svg`;
+	const folder = getSvgFolderForNote(view.file?.path ?? '', plugin);
+	const svgPath = `${folder}/${id}.svg`;
 
 	// Crea il file SVG vuoto PRIMA di inserire il wikilink nel markdown.
 	// Se il file non esiste quando Obsidian processa ![[svg]], mostra
@@ -570,10 +571,7 @@ export async function insertHandwritingBlock(plugin: HandwritingPlugin) {
 	const lineColor = getEffectiveLineColor(plugin.settings);
 	const emptySvg = strokesToSvg([], plugin.settings.canvasWidth, plugin.settings.canvasHeight, bgColor, lineColor);
 
-	const folder = plugin.settings.svgFolder;
-	if (!plugin.app.vault.getAbstractFileByPath(folder)) {
-		await plugin.app.vault.createFolder(folder);
-	}
+	await ensureFolderExists(folder, plugin);
 	await plugin.app.vault.create(svgPath, emptySvg);
 
 	// Inserisce il wikilink: Obsidian trova subito il file → lo renderizza come immagine

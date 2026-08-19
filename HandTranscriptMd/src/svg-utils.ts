@@ -9,6 +9,51 @@ import { TFile } from 'obsidian';
 import type HandwritingPlugin from './main';
 import { Point, Stroke, LINE_SPACING } from './drawing-canvas';
 
+// Crea `path` e tutte le cartelle padre mancanti (vault.createFolder può
+// fallire su percorsi annidati multi-livello se i padri non esistono ancora,
+// es. quando "Organizza per nota" crea sottocartelle profonde alla prima nota).
+export async function ensureFolderExists(path: string, plugin: HandwritingPlugin): Promise<void> {
+	const parts = path.split('/').filter(p => p.length > 0);
+	let current = '';
+	for (const part of parts) {
+		current = current ? `${current}/${part}` : part;
+		if (!plugin.app.vault.getAbstractFileByPath(current)) {
+			await plugin.app.vault.createFolder(current);
+		}
+	}
+}
+
+// Hash breve e stabile di una stringa, usato come suffisso anti-collisione
+// quando il percorso rispecchiato è troppo lungo per il filesystem.
+function shortHash(str: string): string {
+	let h = 0;
+	for (let i = 0; i < str.length; i++) {
+		h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+	}
+	return (h >>> 0).toString(16).padStart(8, '0').substring(0, 6);
+}
+
+// Calcola la cartella in cui salvare gli SVG di una nota.
+// Se `organizeByNote` è attivo, rispecchia il percorso della nota nel vault
+// sotto la cartella SVG radice (es. nota "Progetti/Libro/Cap 1.md" →
+// "_handwriting/Progetti/Libro/Cap 1"), garantendo unicità perché i percorsi
+// nel vault sono già unici. Se il percorso risultante è troppo lungo per il
+// filesystem (limite Windows ~260 caratteri), ripiega su una cartella piatta
+// nome-nota + hash breve del percorso completo, per restare univoco.
+export function getSvgFolderForNote(sourcePath: string, plugin: HandwritingPlugin): string {
+	const root = plugin.settings.svgFolder;
+	if (!plugin.settings.organizeByNote || !sourcePath) return root;
+
+	const noteNoExt = sourcePath.replace(/\.md$/i, '');
+	const mirrored = `${root}/${noteNoExt}`;
+
+	const MAX_PATH_LEN = 200; // margine di sicurezza sotto il limite Windows (260)
+	if (mirrored.length <= MAX_PATH_LEN) return mirrored;
+
+	const basename = noteNoExt.split('/').pop() ?? noteNoExt;
+	return `${root}/${basename} [${shortHash(sourcePath)}]`;
+}
+
 // Genera ID univoco per nuovi disegni nel formato HTMD_YYYYMMDDHHMMSS_XXXX
 export function generateId(): string {
 	const now = new Date();
@@ -164,9 +209,8 @@ export async function archiveSvgFile(svgPath: string, plugin: HandwritingPlugin)
 	const p = (n: number) => String(n).padStart(2, '0');
 	const ts = `${now.getFullYear()}-${p(now.getMonth() + 1)}-${p(now.getDate())}` +
 		`_${p(now.getHours())}-${p(now.getMinutes())}-${p(now.getSeconds())}`;
-	const destFolder = `${plugin.settings.svgFolder}/_converted`;
-	if (!plugin.app.vault.getAbstractFileByPath(destFolder)) {
-		await plugin.app.vault.createFolder(destFolder);
-	}
+	const parentFolder = svgPath.substring(0, svgPath.lastIndexOf('/'));
+	const destFolder = `${parentFolder}/_converted`;
+	await ensureFolderExists(destFolder, plugin);
 	await plugin.app.vault.rename(svgFile, `${destFolder}/${ts}.svg`);
 }

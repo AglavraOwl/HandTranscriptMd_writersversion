@@ -8,6 +8,8 @@
 	"ui_language_auto": "自动（系统语言）",
 	"svg_folder_name": "SVG文件夹",
 	"svg_folder_desc": "保存绘图SVG文件的vault文件夹",
+	"organize_by_note_name": "按笔记整理SVG",
+	"organize_by_note_desc": "启用后,SVG将保存在反映笔记在vault中路径的子文件夹中(例如「项目/书籍/第一章」),而不是全部存放在同一个SVG文件夹中。可避免混淆标题相同的笔记的绘图。",
 	"canvas_width_name": "画布宽度",
 	"canvas_width_desc": "画布水平分辨率（像素）",
 	"canvas_height_name": "画布高度",
