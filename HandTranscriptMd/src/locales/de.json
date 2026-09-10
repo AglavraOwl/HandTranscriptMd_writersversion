@@ -27,6 +27,8 @@
 	"ocr_langs_desc": "Kommagetrennte BCP-47-Sprachcodes (z. B. \"it, en, fr\"). Wird vom KI-Modell für OCR verwendet.",
 	"gemini_key_placeholder": "API-Schlüssel eingeben",
 	"ocr_langs_placeholder": "z. B. it, en, fr",
+	"wordlist_name": "Benutzerdefinierte Wortliste",
+	"wordlist_desc": "Sucht nach einer Datei namens \"handwriting-words.md\" (ein Wort oder Ausdruck pro Zeile) im Ordner der Notiz und in jedem übergeordneten Ordner bis zur Vault-Wurzel und gibt diese Wörter als Rechtschreibhinweise an die OCR weiter -- nützlich für Figurennamen und erfundene Wörter. Dateien auf mehreren Ebenen werden zusammengeführt (eine Liste im Vault-Root gilt überall; eine Liste in einem Story-Ordner gilt nur für Notizen darin). Halte die Listen kurz und fokussiert: Jedes Wort wird bei jeder Anfrage mitgesendet, eine lange Liste erhöht also Kosten und verlangsamt den Vorgang.",
 	"debug_mode_name": "Debug-Modus",
 	"debug_mode_desc": "Echtzeit-Benachrichtigungen für IME/Touch-Ereignisse anzeigen (nützlich zur Diagnose von Android-Problemen).",
 	"keywords_summary": "Vom OCR-Parser erkannte Schlüsselwörter",

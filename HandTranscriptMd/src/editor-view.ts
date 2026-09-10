@@ -11,6 +11,7 @@ import { DrawingCanvas, Stroke } from './drawing-canvas';
 import { strokesToSvg, parseSvgStrokes, svgToBase64Png, archiveSvgFile, ensureFolderExists } from './svg-utils';
 import { getEffectiveBgColor, getEffectiveLineColor, remapStrokeColor, LIGHT_COLORS, DARK_COLORS, resolveIsDark, BgMode } from './settings';
 import { getRecognizer } from './recognizer';
+import { collectWordlist } from './wordlist';
 import { parseHandwritingToMarkdown } from './md-parser';
 import { t, type I18nKey } from './i18n';
 
@@ -477,8 +478,9 @@ export class DrawingEditorView extends ItemView {
 				this.canvas.getHeight(), this.canvas.getBgColor(), this.canvas.getLineColor());
 			const svgEl  = new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement as unknown as SVGElement;
 			const base64 = await svgToBase64Png(svgEl);
+			const wordlist = this.plugin.settings.useCustomWordlist ? await collectWordlist(this.sourcePath, this.plugin) : [];
 			const recognizer = getRecognizer(this.plugin.settings.geminiApiKey, this.plugin.settings.ocrLanguages);
-			const rawText = await recognizer.recognize(base64, this.plugin.settings.continuousMode);
+			const rawText = await recognizer.recognize(base64, this.plugin.settings.continuousMode, wordlist);
 			if (!rawText.trim()) throw new Error(t('error_no_text'));
 			const markdown = parseHandwritingToMarkdown(rawText, this.plugin.settings.continuousMode);
 			await archiveSvgFile(this.svgPath, this.plugin);
@@ -635,8 +637,9 @@ export class DrawingModal extends Modal {
 				this.canvas.getBgColor(), this.canvas.getLineColor());
 			const svgEl  = new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement as unknown as SVGElement;
 			const base64 = await svgToBase64Png(svgEl);
+			const wordlist = this.plugin.settings.useCustomWordlist ? await collectWordlist(this.sourcePath, this.plugin) : [];
 			const recognizer = getRecognizer(this.plugin.settings.geminiApiKey, this.plugin.settings.ocrLanguages);
-			const rawText = await recognizer.recognize(base64, this.plugin.settings.continuousMode);
+			const rawText = await recognizer.recognize(base64, this.plugin.settings.continuousMode, wordlist);
 			if (!rawText.trim()) throw new Error(t('error_no_text'));
 			const markdown = parseHandwritingToMarkdown(rawText, this.plugin.settings.continuousMode);
 			await archiveSvgFile(this.svgPath, this.plugin);

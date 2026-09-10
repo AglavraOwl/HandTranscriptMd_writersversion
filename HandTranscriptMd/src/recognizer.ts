@@ -28,7 +28,7 @@ interface GeminiResponse {
 // alternativo (es. OCR locale) senza modificare embed.ts
 
 export interface IRecognizer {
-	recognize(imageBase64: string, continuousMode?: boolean): Promise<string>;
+	recognize(imageBase64: string, continuousMode?: boolean, wordlist?: string[]): Promise<string>;
 }
 
 /* ---------- GeminiRecognizer ---------- */
@@ -39,11 +39,16 @@ class GeminiRecognizer implements IRecognizer {
 		private languages: string[]
 	) {}
 
-	async recognize(imageBase64: string, continuousMode = false): Promise<string> {
+	async recognize(imageBase64: string, continuousMode = false, wordlist: string[] = []): Promise<string> {
 		// Costruisce il prompt specificando le lingue attese e il formato di output
 		const langList = this.languages.join(', ');
 		// Simboli markdown preservati (identici nei due prompt)
 		const preserved = `#, ##, ###, -, *, >, %%, \`\`\`, **text**, *text*, ==text==, ~~text~~, - [ ], - [x]`;
+		// Suggerimenti di vocabolario personalizzato (nomi propri, parole inventate, ecc.)
+		// raccolti da wordlist.ts — vedi impostazione "Custom wordlist"
+		const wordlistHint = wordlist.length > 0
+			? `The following words or names may appear in the text -- if the handwriting resembles one of them, prefer this exact spelling: ${wordlist.join(', ')}. `
+			: '';
 
 		// Modalita Continuous: non chiediamo al modello di decidere quali a capo unire
 		// (giudizio inaffidabile) -- trascrive letteralmente riga per riga, il plugin
@@ -55,6 +60,7 @@ class GeminiRecognizer implements IRecognizer {
 			`Analyze the image and transcribe exactly the text that was written, line by line, ` +
 			`exactly as laid out -- do NOT try to join or merge any lines yourself, keep every line break exactly where the handwriting has one. ` +
 			`The expected languages are: ${langList}. ` +
+			wordlistHint +
 			`Preserve the markdown symbols written by the user (e.g. ${preserved}). ` +
 			`If the user wrote the marker //Z, transcribe it exactly as "//Z" on its own line, unchanged. ` +
 			`Return ONLY the transcribed text, with no additional explanation.`
@@ -62,6 +68,7 @@ class GeminiRecognizer implements IRecognizer {
 			`You are an OCR system specialized in handwriting recognition. ` +
 			`Analyze the image and transcribe exactly the text that was written. ` +
 			`The expected languages are: ${langList}. ` +
+			wordlistHint +
 			`Preserve the markdown symbols written by the user (e.g. ${preserved}). ` +
 			`When text spans multiple lines due to page space limits (word wrap), ` +
 			`join those lines into a single continuous paragraph, replacing the line break with a space. ` +

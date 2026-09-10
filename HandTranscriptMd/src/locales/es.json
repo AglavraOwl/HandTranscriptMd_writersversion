@@ -27,6 +27,8 @@
 	"ocr_langs_desc": "Códigos de idioma BCP-47 separados por comas (p. ej. \"it, en, fr\"). Usados por el modelo de IA para el OCR.",
 	"gemini_key_placeholder": "Introduce la clave API",
 	"ocr_langs_placeholder": "p. ej. it, en, fr",
+	"wordlist_name": "Lista de palabras personalizada",
+	"wordlist_desc": "Busca un archivo llamado «handwriting-words.md» (una palabra o frase por línea) en la carpeta de la nota y en cada carpeta superior hasta la raíz de la bóveda, y proporciona esas palabras al OCR como sugerencias ortográficas -- útil para nombres de personajes y palabras inventadas. Los archivos encontrados en varios niveles se combinan (una lista en la raíz de la bóveda se aplica en todas partes; una lista en la carpeta de una historia se aplica solo a las notas que contiene). Mantén las listas breves y enfocadas: cada palabra se envía con cada solicitud, por lo que una lista larga aumenta el coste y ralentiza el proceso.",
 	"debug_mode_name": "Modo depuración",
 	"debug_mode_desc": "Muestra notificaciones en tiempo real para eventos IME/táctil (útil para diagnosticar problemas en Android).",
 	"keywords_summary": "Palabras clave reconocidas por el parser OCR",

@@ -206,8 +206,33 @@ Open **Settings → Handwriting to Markdown** to configure:
 | **Canvas background** | Light / Dark / Auto (follows Obsidian theme) |
 | **Gemini API key** | Required for OCR. Get it free at [aistudio.google.com](https://aistudio.google.com). |
 | **OCR languages** | Comma-separated BCP-47 codes (e.g. `it, en, fr`). Tells Gemini which languages to expect. |
+| **Custom wordlist** | On by default. See [Custom Wordlist](#custom-wordlist-proper-nouns--invented-words) below. |
 
 > **Note — Free API key limitations:** With the free tier of Google AI Studio, your data may be used by Google to improve their models. Additionally, under high traffic you may see a **"Too many requests — please try again later"** error. To avoid rate limits, enable billing on [Google AI Studio](https://aistudio.google.com); costs are minimal for occasional OCR use.
+
+---
+
+### Custom Wordlist (Proper Nouns & Invented Words)
+
+Handwriting OCR often stumbles on character names, invented words, or other terms that aren't in a dictionary (e.g. a fictional being named *Bakunawa*). To help Gemini get these right, the plugin can feed it a list of expected spellings as a hint.
+
+**How it works:**
+
+1. Create a plain-text file named exactly **`handwriting-words.md`**, with one word or phrase per line. Lines starting with `#` are treated as comments and ignored.
+2. Place it anywhere in your vault:
+   - At the **vault root** → applies to every note, vault-wide.
+   - Inside a **specific folder** (e.g. a story's root folder) → applies only to notes in that folder and its subfolders.
+3. When converting a handwriting block, the plugin walks up from the note's folder to the vault root and **merges every `handwriting-words.md` it finds along the way** — so a note in `Stories/Bakunawa/Chapter 1.md` picks up words from `Stories/Bakunawa/handwriting-words.md` *and* a vault-root list, if both exist.
+
+```
+Stories/handwriting-words.md          ← e.g. general recurring names
+Stories/Bakunawa/handwriting-words.md ← e.g. Bakunawa, Aswang
+Stories/Bakunawa/Chapter 1.md         ← picks up both lists above
+```
+
+**Keep lists short and focused** — every word is sent to Gemini with each OCR request, so a long list adds cost and slows things down. Favor distinctive proper nouns and invented words over ordinary vocabulary; the list is a spelling *hint*, not a guarantee.
+
+Turn this off entirely with the **Custom wordlist** toggle in settings.
 
 ---
 
@@ -249,6 +274,7 @@ HandTranscriptMd/
 │   ├── embed.ts                ← inline preview decoration + portal panel
 │   ├── editor-view.ts          ← drawing editor (modal on Windows, tab on Android)
 │   ├── recognizer.ts           ← Gemini OCR interface + HTTP call
+│   ├── wordlist.ts             ← custom wordlist lookup (cascading handwriting-words.md)
 │   ├── md-parser.ts            ← keyword-based OCR text → Markdown converter
 │   └── parser.test.ts          ← unit tests for the markdown parser
 │
@@ -396,6 +422,7 @@ Two build modes:
 | Change behavior specific to the Android tab only | `src/editor-view.ts` → `DrawingEditorView` class |
 | Change the save / delete / convert logic inside the editor | `src/editor-view.ts` → `DrawingModal.doSave/doConvert/doDelete` or `DrawingEditorView.doSave/doConvert/doDelete` |
 | Change which OCR model is called or the prompt sent to Gemini | `src/recognizer.ts` → `GeminiRecognizer.recognize()` |
+| Change the custom wordlist filename, comment syntax, or folder-lookup logic | `src/wordlist.ts` → `collectWordlist()` |
 | Change how OCR text is parsed into Markdown keywords | `src/md-parser.ts` → `parseHandwritingToMarkdown()`, `expandKeywords()` |
 | Change how `//TABLE` blocks are parsed | `src/md-parser.ts` → table handling logic inside `parseHandwritingToMarkdown()` |
 | Change plugin CSS (colors, sizes, layout) | `styles.css` |
@@ -639,5 +666,6 @@ To add a third format:
 | `src/embed.ts` | Preview decoration (wiki + legacy), portal panel, OCR pipeline runner |
 | `src/editor-view.ts` | `buildEditorUI()` shared builder, `DrawingEditorView` (Android tab), `DrawingModal` (desktop) |
 | `src/recognizer.ts` | `IRecognizer` interface + `GeminiRecognizer` (REST call to Gemini) |
+| `src/wordlist.ts` | `collectWordlist()`: cascading lookup + merge of `handwriting-words.md` files |
 | `src/md-parser.ts` | `parseHandwritingToMarkdown()`: keyword expansion, OCR text → Markdown |
 | `src/locales/*.json` | Locale strings for each supported language |

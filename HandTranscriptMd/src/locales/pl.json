@@ -27,6 +27,8 @@
 	"ocr_langs_desc": "Kody języków BCP-47 oddzielone przecinkami (np. \"it, en, fr\"). Używane przez model AI do OCR.",
 	"gemini_key_placeholder": "Wprowadź klucz API",
 	"ocr_langs_placeholder": "np. it, en, fr",
+	"wordlist_name": "Niestandardowa lista słów",
+	"wordlist_desc": "Szuka pliku o nazwie „handwriting-words.md” (jedno słowo lub fraza w wierszu) w folderze notatki i w każdym folderze nadrzędnym aż do katalogu głównego magazynu, i przekazuje te słowa do OCR jako podpowiedzi pisowni -- przydatne dla imion postaci i wymyślonych słów. Pliki znalezione na wielu poziomach są łączone (lista w katalogu głównym magazynu obowiązuje wszędzie; lista w folderze opowiadania dotyczy tylko notatek w nim zawartych). Utrzymuj listy krótkie i skoncentrowane: każde słowo jest wysyłane z każdym żądaniem, więc długa lista zwiększa koszt i spowalnia działanie.",
 	"debug_mode_name": "Tryb debugowania",
 	"debug_mode_desc": "Pokazuje powiadomienia w czasie rzeczywistym dla zdarzeń IME/dotyk (przydatne do diagnozowania problemów na Androidzie).",
 	"keywords_summary": "Słowa kluczowe rozpoznawane przez parser OCR",

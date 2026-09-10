@@ -24,6 +24,7 @@ import { Stroke } from './drawing-canvas';
 import { strokesToSvg, parseSvgStrokes, generateId, svgToBase64Png, archiveSvgFile, getSvgFolderForNote, ensureFolderExists } from './svg-utils';
 import { getEffectiveBgColor, getEffectiveLineColor, remapStrokeColor, BgMode, resolveIsDark } from './settings';
 import { getRecognizer } from './recognizer';
+import { collectWordlist } from './wordlist';
 import { parseHandwritingToMarkdown } from './md-parser';
 import { VIEW_TYPE_HANDWRITING, DrawingEditorView, DrawingModal, preserveFocusAcrossModify } from './editor-view';
 
@@ -374,14 +375,15 @@ function renderPreviewContent(preview: HTMLElement, svgContent: string | null) {
 
 // Esegue il riconoscimento OCR su un SVG e restituisce il testo markdown.
 // Lancia eccezione in caso di errore — il chiamante decide se catturarla o propagarla.
-async function runOcrPipeline(svgContent: string, plugin: HandwritingPlugin): Promise<string> {
+async function runOcrPipeline(svgContent: string, plugin: HandwritingPlugin, sourcePath: string): Promise<string> {
 	new Notice(t('notice_recognizing'));
 	const svgEl = new DOMParser()
 		.parseFromString(svgContent, 'image/svg+xml')
 		.documentElement as unknown as SVGElement;
 	const base64     = await svgToBase64Png(svgEl);
+	const wordlist    = plugin.settings.useCustomWordlist ? await collectWordlist(sourcePath, plugin) : [];
 	const recognizer = getRecognizer(plugin.settings.geminiApiKey, plugin.settings.ocrLanguages);
-	const rawText    = await recognizer.recognize(base64, plugin.settings.continuousMode);
+	const rawText    = await recognizer.recognize(base64, plugin.settings.continuousMode, wordlist);
 	if (!rawText.trim()) throw new Error(t('error_no_text'));
 	// In modalità debug mostra il testo grezzo restituito da Gemini (prima del parsing)
 	if (plugin.settings.debugMode) new Notice(`[DEBUG] Testo grezzo Gemini:\n${rawText}`, 30000);
@@ -399,7 +401,7 @@ async function doConvertWiki(
 	plugin: HandwritingPlugin
 ) {
 	// Lancia eccezione in caso di errore (il chiamante decide se mostrare Notice o propagare)
-	const markdown = await runOcrPipeline(svgContent, plugin);
+	const markdown = await runOcrPipeline(svgContent, plugin, sourcePath);
 	await archiveSvgFile(svgPath, plugin);
 	await replaceWikiEmbedWithMarkdown(svgPath, markdown, sourcePath, plugin);
 	new Notice(t('notice_converted'));
@@ -416,7 +418,7 @@ async function doConvert(
 	plugin: HandwritingPlugin
 ) {
 	try {
-		const markdown = await runOcrPipeline(svgContent, plugin);
+		const markdown = await runOcrPipeline(svgContent, plugin, ctx.sourcePath);
 		await archiveSvgFile(data.svg, plugin);
 		await replaceEmbedWithMarkdown(ctx, data, markdown, plugin);
 		new Notice(t('notice_converted'));

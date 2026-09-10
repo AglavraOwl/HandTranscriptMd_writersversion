@@ -20,6 +20,8 @@
 	"ocr_langs_desc": "Comma-separated BCP-47 language codes (e.g. \"it, en, fr\"). Used by the AI model for OCR.",
 	"gemini_key_placeholder": "Enter API key",
 	"ocr_langs_placeholder": "e.g. it, en, fr",
+	"wordlist_name": "Custom wordlist",
+	"wordlist_desc": "Looks for a file named \"handwriting-words.md\" (one word or phrase per line) in the note's folder and every parent folder up to the vault root, and gives those words to the OCR as spelling hints -- useful for character names and invented words. Files at multiple levels are merged together (a vault-root list applies everywhere; a list in a story folder applies only to notes inside it). Keep lists short and focused: every word is sent with each request, so a long list adds cost and slows things down.",
 	"debug_mode_name": "Debug mode",
 	"debug_mode_desc": "Show real-time notifications for IME/touch events (useful for diagnosing issues on Android).",
 	"keywords_summary": "Keywords recognized by the OCR parser",

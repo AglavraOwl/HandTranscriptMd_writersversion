@@ -17,6 +17,7 @@ export interface HandwritingSettings {
 	bgMode: BgMode;               // modalità sfondo
 	ocrLanguages: string[];       // lingue per il riconoscimento OCR (codici BCP-47, es. 'it', 'en')
 	geminiApiKey: string;         // chiave API Google Gemini per l'OCR
+	useCustomWordlist: boolean;   // usa handwriting-words.md (cascading dalla nota alla radice) come suggerimento OCR
 	debugMode: boolean;           // mostra Notice di debug per eventi IME/touch
 	uiLanguage: string;           // lingua dell'interfaccia impostazioni ('auto' = segue sistema)
 	continuousMode: boolean;      // unisce tutte le righe in un unico paragrafo, //Z per andare a capo
@@ -91,6 +92,7 @@ export const DEFAULT_SETTINGS: HandwritingSettings = {
 	bgMode: 'auto',               // default: segue automaticamente il tema di Obsidian
 	ocrLanguages: ['it', 'en'],   // italiano e inglese di default
 	geminiApiKey: '',
+	useCustomWordlist: true,
 	debugMode: false,
 	uiLanguage: 'auto',           // default: segue la lingua di sistema di Obsidian
 	continuousMode: false,
@@ -247,6 +249,17 @@ export class HandwritingSettingTab extends PluginSettingTab {
 						.map(l => l.trim())
 						.filter(l => l.length > 0);
 					this.plugin.settings.ocrLanguages = langs.length > 0 ? langs : ['it', 'en'];
+					await this.plugin.saveSettings();
+				}));
+
+		// --- Wordlist personalizzata ---
+		new Setting(containerEl)
+			.setName(t('wordlist_name'))
+			.setDesc(t('wordlist_desc'))
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.useCustomWordlist)
+				.onChange(async (value) => {
+					this.plugin.settings.useCustomWordlist = value;
 					await this.plugin.saveSettings();
 				}));
 
