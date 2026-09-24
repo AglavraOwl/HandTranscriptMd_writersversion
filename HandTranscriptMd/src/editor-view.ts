@@ -479,7 +479,7 @@ export class DrawingEditorView extends ItemView {
 			const svgEl  = new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement as unknown as SVGElement;
 			const base64 = await svgToBase64Png(svgEl);
 			const wordlist = this.plugin.settings.useCustomWordlist ? await collectWordlist(this.sourcePath, this.plugin) : [];
-			const recognizer = getRecognizer(this.plugin.settings.geminiApiKey, this.plugin.settings.ocrLanguages);
+			const recognizer = getRecognizer(this.plugin.settings);
 			const rawText = await recognizer.recognize(base64, this.plugin.settings.continuousMode, wordlist);
 			if (!rawText.trim()) throw new Error(t('error_no_text'));
 			const markdown = parseHandwritingToMarkdown(rawText, this.plugin.settings.continuousMode);
@@ -638,7 +638,7 @@ export class DrawingModal extends Modal {
 			const svgEl  = new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement as unknown as SVGElement;
 			const base64 = await svgToBase64Png(svgEl);
 			const wordlist = this.plugin.settings.useCustomWordlist ? await collectWordlist(this.sourcePath, this.plugin) : [];
-			const recognizer = getRecognizer(this.plugin.settings.geminiApiKey, this.plugin.settings.ocrLanguages);
+			const recognizer = getRecognizer(this.plugin.settings);
 			const rawText = await recognizer.recognize(base64, this.plugin.settings.continuousMode, wordlist);
 			if (!rawText.trim()) throw new Error(t('error_no_text'));
 			const markdown = parseHandwritingToMarkdown(rawText, this.plugin.settings.continuousMode);

@@ -2,12 +2,16 @@
    Settings — Configurazione del plugin
    ============================================= */
 
-import { App, PluginSettingTab, Setting } from 'obsidian';
+import { App, PluginSettingTab, Setting, Notice } from 'obsidian';
 import type HandwritingPlugin from './main';
 import { t, setLocale, availableLocales, localeNames } from './i18n';
+import { fetchOpenRouterModels, testGeminiConnection, testOpenRouterConnection, OpenRouterModelSuggestModal } from './openrouter';
 
 // Modalità sfondo: chiaro, scuro o automatico (segue il tema di Obsidian)
 export type BgMode = 'light' | 'dark' | 'auto';
+
+// Provider OCR: quale servizio usare per il riconoscimento
+export type OcrProvider = 'gemini' | 'openrouter';
 
 export interface HandwritingSettings {
 	svgFolder: string;            // cartella dove salvare i file SVG
@@ -16,7 +20,10 @@ export interface HandwritingSettings {
 	canvasHeight: number;         // altezza interna del canvas (px)
 	bgMode: BgMode;               // modalità sfondo
 	ocrLanguages: string[];       // lingue per il riconoscimento OCR (codici BCP-47, es. 'it', 'en')
+	ocrProvider: OcrProvider;     // provider OCR attivo ('gemini' o 'openrouter')
 	geminiApiKey: string;         // chiave API Google Gemini per l'OCR
+	openrouterApiKey: string;     // chiave API OpenRouter per l'OCR
+	openrouterModel: string;      // id del modello OpenRouter selezionato (es. 'google/gemini-2.5-flash')
 	useCustomWordlist: boolean;   // usa handwriting-words.md (cascading dalla nota alla radice) come suggerimento OCR
 	debugMode: boolean;           // mostra Notice di debug per eventi IME/touch
 	uiLanguage: string;           // lingua dell'interfaccia impostazioni ('auto' = segue sistema)
@@ -91,7 +98,10 @@ export const DEFAULT_SETTINGS: HandwritingSettings = {
 	canvasHeight: 300,
 	bgMode: 'auto',               // default: segue automaticamente il tema di Obsidian
 	ocrLanguages: ['it', 'en'],   // italiano e inglese di default
+	ocrProvider: 'gemini',        // default: comportamento attuale
 	geminiApiKey: '',
+	openrouterApiKey: '',
+	openrouterModel: '',
 	useCustomWordlist: true,
 	debugMode: false,
 	uiLanguage: 'auto',           // default: segue la lingua di sistema di Obsidian
@@ -218,7 +228,20 @@ export class HandwritingSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
-		// --- Chiave API Gemini ---
+		// --- Provider OCR ---
+		new Setting(containerEl)
+			.setName(t('ocr_provider_name'))
+			.setDesc(t('ocr_provider_desc'))
+			.addDropdown(drop => drop
+				.addOption('gemini', t('ocr_provider_gemini'))
+				.addOption('openrouter', t('ocr_provider_openrouter'))
+				.setValue(this.plugin.settings.ocrProvider)
+				.onChange(async (value) => {
+					this.plugin.settings.ocrProvider = value as OcrProvider;
+					await this.plugin.saveSettings();
+				}));
+
+		// --- Chiave API Gemini (+ test connessione) ---
 		new Setting(containerEl)
 			.setName(t('gemini_key_name'))
 			.setDesc(t('gemini_key_desc'))
@@ -232,7 +255,66 @@ export class HandwritingSettingTab extends PluginSettingTab {
 					});
 				// Maschera il testo come password per nascondere la chiave
 				text.inputEl.type = 'password';
-			});
+			})
+			.addButton(btn => btn
+				.setButtonText(t('btn_test_connection'))
+				.onClick(() => { void (async () => {
+					btn.setDisabled(true);
+					btn.setButtonText(t('notice_testing_connection'));
+					const result = await testGeminiConnection(this.plugin.settings.geminiApiKey);
+					new Notice(result.ok ? t('notice_connection_ok') : t('notice_connection_fail') + result.message);
+					btn.setButtonText(t('btn_test_connection'));
+					btn.setDisabled(false);
+				})(); }));
+
+		// --- Chiave API OpenRouter (+ test connessione) ---
+		new Setting(containerEl)
+			.setName(t('openrouter_key_name'))
+			.setDesc(t('openrouter_key_desc'))
+			.addText(text => {
+				text
+					.setPlaceholder(t('openrouter_key_placeholder'))
+					.setValue(this.plugin.settings.openrouterApiKey)
+					.onChange(async (value) => {
+						this.plugin.settings.openrouterApiKey = value.trim();
+						await this.plugin.saveSettings();
+					});
+				// Maschera il testo come password per nascondere la chiave
+				text.inputEl.type = 'password';
+			})
+			.addButton(btn => btn
+				.setButtonText(t('btn_test_connection'))
+				.onClick(() => { void (async () => {
+					btn.setDisabled(true);
+					btn.setButtonText(t('notice_testing_connection'));
+					const result = await testOpenRouterConnection(this.plugin.settings.openrouterApiKey);
+					new Notice(result.ok ? t('notice_connection_ok') : t('notice_connection_fail') + result.message);
+					btn.setButtonText(t('btn_test_connection'));
+					btn.setDisabled(false);
+				})(); }));
+
+		// --- Modello OpenRouter ---
+		new Setting(containerEl)
+			.setName(t('openrouter_model_name'))
+			.setDesc(t('openrouter_model_desc'))
+			.addButton(btn => btn
+				.setButtonText(this.plugin.settings.openrouterModel || t('model_none_selected'))
+				.onClick(() => { void (async () => {
+					btn.setDisabled(true);
+					new Notice(t('notice_fetching_models'));
+					try {
+						const models = await fetchOpenRouterModels();
+						new OpenRouterModelSuggestModal(this.app, models, (model) => { void (async () => {
+							this.plugin.settings.openrouterModel = model.id;
+							await this.plugin.saveSettings();
+							this.display();
+						})(); }).open();
+					} catch (e: unknown) {
+						new Notice(t('notice_connection_fail') + (e instanceof Error ? e.message : String(e)));
+					} finally {
+						btn.setDisabled(false);
+					}
+				})(); }));
 
 		// --- Lingue OCR ---
 		new Setting(containerEl)
