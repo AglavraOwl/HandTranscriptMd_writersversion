@@ -29,6 +29,8 @@
 	"ocr_langs_placeholder": "例如：it, en, fr",
 	"wordlist_name": "自定义词表",
 	"wordlist_desc": "在笔记所在文件夹及其到库根目录之间的每个上级文件夹中查找名为 \"handwriting-words.md\" 的文件(每行一个单词或短语),并将这些词提供给 OCR 作为拼写提示 -- 适用于人物姓名和自创词汇。多个层级找到的文件会被合并(库根目录的列表在任何地方都生效;故事文件夹中的列表仅对其中的笔记生效)。请保持列表简短且有针对性:每个单词都会随每次请求发送,列表过长会增加成本并拖慢速度。",
+	"hyphen_breaks_name": "移除换行连字符",
+	"hyphen_breaks_desc": "合并因换行而用连字符断开的单词：\"hand- writing\" 会变成 \"handwriting\"。只合并“字母、连字符、空格、字母”的连续组合，因此 \"well-known\" 这类普通连字符不会受影响。",
 	"debug_mode_name": "调试模式",
 	"debug_mode_desc": "显示IME/触摸事件的实时通知（用于诊断Android问题）。",
 	"keywords_summary": "OCR解析器识别的关键词",

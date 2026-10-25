@@ -387,7 +387,7 @@ async function runOcrPipeline(svgContent: string, plugin: HandwritingPlugin, sou
 	if (!rawText.trim()) throw new Error(t('error_no_text'));
 	// In modalità debug mostra il testo grezzo restituito da Gemini (prima del parsing)
 	if (plugin.settings.debugMode) new Notice(`[DEBUG] Testo grezzo Gemini:\n${rawText}`, 30000);
-	return parseHandwritingToMarkdown(rawText, plugin.settings.continuousMode);
+	return parseHandwritingToMarkdown(rawText, plugin.settings.continuousMode, plugin.settings.removeHyphenBreaks);
 }
 
 /* =============================================

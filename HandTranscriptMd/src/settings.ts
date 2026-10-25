@@ -25,6 +25,7 @@ export interface HandwritingSettings {
 	openrouterApiKey: string;     // chiave API OpenRouter per l'OCR
 	openrouterModel: string;      // id del modello OpenRouter selezionato (es. 'google/gemini-2.5-flash')
 	useCustomWordlist: boolean;   // usa handwriting-words.md (cascading dalla nota alla radice) come suggerimento OCR
+	removeHyphenBreaks: boolean;  // unisce le parole spezzate a fine riga ("дотро- нулась" → "дотронулась")
 	debugMode: boolean;           // mostra Notice di debug per eventi IME/touch
 	uiLanguage: string;           // lingua dell'interfaccia impostazioni ('auto' = segue sistema)
 	continuousMode: boolean;      // unisce tutte le righe in un unico paragrafo, //Z per andare a capo
@@ -103,6 +104,7 @@ export const DEFAULT_SETTINGS: HandwritingSettings = {
 	openrouterApiKey: '',
 	openrouterModel: '',
 	useCustomWordlist: true,
+	removeHyphenBreaks: false,    // default: testo OCR invariato
 	debugMode: false,
 	uiLanguage: 'auto',           // default: segue la lingua di sistema di Obsidian
 	continuousMode: false,
@@ -342,6 +344,17 @@ export class HandwritingSettingTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.useCustomWordlist)
 				.onChange(async (value) => {
 					this.plugin.settings.useCustomWordlist = value;
+					await this.plugin.saveSettings();
+				}));
+
+		// --- Trattini di a capo ---
+		new Setting(containerEl)
+			.setName(t('hyphen_breaks_name'))
+			.setDesc(t('hyphen_breaks_desc'))
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.removeHyphenBreaks)
+				.onChange(async (value) => {
+					this.plugin.settings.removeHyphenBreaks = value;
 					await this.plugin.saveSettings();
 				}));
 

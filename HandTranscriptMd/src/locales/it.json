@@ -22,6 +22,8 @@
 	"ocr_langs_placeholder": "es. it, en, fr",
 	"wordlist_name": "Elenco parole personalizzato",
 	"wordlist_desc": "Cerca un file chiamato \"handwriting-words.md\" (una parola o frase per riga) nella cartella della nota e in ogni cartella superiore fino alla radice del vault, e fornisce queste parole all'OCR come suggerimenti ortografici -- utile per nomi di personaggi e parole inventate. I file trovati a più livelli vengono uniti (un elenco nella radice del vault si applica ovunque; un elenco nella cartella di una storia si applica solo alle note al suo interno). Mantieni gli elenchi brevi e mirati: ogni parola viene inviata a ogni richiesta, quindi un elenco lungo aumenta i costi e rallenta il processo.",
+	"hyphen_breaks_name": "Rimuovi i trattini di a capo",
+	"hyphen_breaks_desc": "Unisce le parole spezzate a fine riga con un trattino: \"scri- vere\" diventa \"scrivere\". Viene unita solo la sequenza lettera, trattino, spazio, lettera, quindi i trattini normali come \"sud-est\" restano intatti.",
 	"debug_mode_name": "Modalità debug",
 	"debug_mode_desc": "Mostra notifiche in tempo reale per eventi IME/touch (utile per diagnosticare problemi su Android).",
 	"keywords_summary": "Keyword riconosciute dal parser OCR",

@@ -29,6 +29,8 @@
 	"ocr_langs_placeholder": "p. ej. it, en, fr",
 	"wordlist_name": "Lista de palabras personalizada",
 	"wordlist_desc": "Busca un archivo llamado «handwriting-words.md» (una palabra o frase por línea) en la carpeta de la nota y en cada carpeta superior hasta la raíz de la bóveda, y proporciona esas palabras al OCR como sugerencias ortográficas -- útil para nombres de personajes y palabras inventadas. Los archivos encontrados en varios niveles se combinan (una lista en la raíz de la bóveda se aplica en todas partes; una lista en la carpeta de una historia se aplica solo a las notas que contiene). Mantén las listas breves y enfocadas: cada palabra se envía con cada solicitud, por lo que una lista larga aumenta el coste y ralentiza el proceso.",
+	"hyphen_breaks_name": "Quitar guiones de fin de línea",
+	"hyphen_breaks_desc": "Une las palabras partidas al final de la línea con un guion: «escri- bir» pasa a «escribir». Solo se une la secuencia letra, guion, espacio, letra, así que los guiones normales como «hispano-árabe» no se tocan.",
 	"debug_mode_name": "Modo depuración",
 	"debug_mode_desc": "Muestra notificaciones en tiempo real para eventos IME/táctil (útil para diagnosticar problemas en Android).",
 	"keywords_summary": "Palabras clave reconocidas por el parser OCR",

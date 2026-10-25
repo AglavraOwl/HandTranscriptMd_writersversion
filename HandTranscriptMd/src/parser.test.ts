@@ -8,7 +8,7 @@
    un helper expect/toBe inline.
    ============================================= */
 
-import { normalizeMarkdownSymbols as normalize, expandKeywords as expand, parseHandwritingToMarkdown as parse, collapseContinuousLines as collapse } from './md-parser.js';
+import { normalizeMarkdownSymbols as normalize, expandKeywords as expand, parseHandwritingToMarkdown as parse, collapseContinuousLines as collapse, removeHyphenBreaks as joinBreaks } from './md-parser.js';
 
 // --- Mini test runner ---
 
@@ -237,6 +237,28 @@ describe('pipeline completa', () => {
 	expect(tableOut).toContain('| Col1 | Col2 | Col3 |');
 	expect(tableOut).toContain('| val1 | val2 | val3 |');
 	expect(tableOut).toContain('| val4 | val5 | val6 |');
+});
+
+// =============================================================================
+// Trattini di a capo
+// =============================================================================
+
+describe('removeHyphenBreaks', () => {
+	expect(joinBreaks('дотро- нулась до плеча')).toBe('дотронулась до плеча');
+	// I trattini normali non vengono toccati
+	expect(joinBreaks('что-то и кто-нибудь')).toBe('что-то и кто-нибудь');
+	// Trattino lungo con spazi, elenchi e trattino senza lettera dopo
+	expect(joinBreaks('он - мой брат')).toBe('он - мой брат');
+	expect(joinBreaks('- пункт списка')).toBe('- пункт списка');
+	expect(joinBreaks('конец-\n- пункт')).toBe('конец-\n- пункт');
+	// Blocchi di codice intatti
+	expect(joinBreaks('```\na- b\n```\nдо- бро')).toBe('```\na- b\n```\nдобро');
+	// Pipeline: disattivato di default, attivo solo con il flag
+	expect(parse('дотро- нулась')).toBe('дотро- нулась');
+	expect(parse('дотро- нулась', false, true)).toBe('дотронулась');
+	// Continuous mode: le righe vengono unite con uno spazio, poi il trattino viene rimosso
+	expect(parse('дотро-\nнулась\nещё раз', true, true)).toBe('дотронулась ещё раз');
+	expect(parse('дотро-\nнулась\nещё раз', true)).toBe('дотро- нулась ещё раз');
 });
 
 // =============================================================================

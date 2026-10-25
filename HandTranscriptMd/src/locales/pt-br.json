@@ -29,6 +29,8 @@
 	"ocr_langs_placeholder": "ex.: it, en, fr",
 	"wordlist_name": "Lista de palavras personalizada",
 	"wordlist_desc": "Procura um arquivo chamado \"handwriting-words.md\" (uma palavra ou frase por linha) na pasta da nota e em cada pasta superior até a raiz do cofre, e fornece essas palavras ao OCR como dicas de ortografia -- útil para nomes de personagens e palavras inventadas. Arquivos encontrados em vários níveis são mesclados (uma lista na raiz do cofre se aplica a tudo; uma lista na pasta de uma história se aplica só às notas dentro dela). Mantenha as listas curtas e focadas: cada palavra é enviada a cada solicitação, então uma lista longa aumenta o custo e deixa o processo mais lento.",
+	"hyphen_breaks_name": "Remover hifens de quebra de linha",
+	"hyphen_breaks_desc": "Une palavras divididas no fim da linha com hífen: \"escre- ver\" vira \"escrever\". Só a sequência letra, hífen, espaço, letra é unida, então hifens normais como \"guarda-chuva\" não são alterados.",
 	"debug_mode_name": "Modo debug",
 	"debug_mode_desc": "Mostra notificações em tempo real para eventos IME/toque (útil para diagnosticar problemas no Android).",
 	"keywords_summary": "Palavras-chave reconhecidas pelo parser OCR",

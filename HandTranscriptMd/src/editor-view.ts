@@ -482,7 +482,7 @@ export class DrawingEditorView extends ItemView {
 			const recognizer = getRecognizer(this.plugin.settings);
 			const rawText = await recognizer.recognize(base64, this.plugin.settings.continuousMode, wordlist);
 			if (!rawText.trim()) throw new Error(t('error_no_text'));
-			const markdown = parseHandwritingToMarkdown(rawText, this.plugin.settings.continuousMode);
+			const markdown = parseHandwritingToMarkdown(rawText, this.plugin.settings.continuousMode, this.plugin.settings.removeHyphenBreaks);
 			await archiveSvgFile(this.svgPath, this.plugin);
 			await replaceInMdFile(this.sourcePath, this.svgPath, this.embedId, '\n' + markdown + '\n', this.plugin);
 			overlay.remove();
@@ -641,7 +641,7 @@ export class DrawingModal extends Modal {
 			const recognizer = getRecognizer(this.plugin.settings);
 			const rawText = await recognizer.recognize(base64, this.plugin.settings.continuousMode, wordlist);
 			if (!rawText.trim()) throw new Error(t('error_no_text'));
-			const markdown = parseHandwritingToMarkdown(rawText, this.plugin.settings.continuousMode);
+			const markdown = parseHandwritingToMarkdown(rawText, this.plugin.settings.continuousMode, this.plugin.settings.removeHyphenBreaks);
 			await archiveSvgFile(this.svgPath, this.plugin);
 			await replaceInMdFile(this.sourcePath, this.svgPath, this.embedId, '\n' + markdown + '\n', this.plugin);
 			overlay.remove();

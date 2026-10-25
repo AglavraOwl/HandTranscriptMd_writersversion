@@ -479,15 +479,38 @@ export function collapseContinuousLines(rawText: string): string {
 }
 
 // =============================================================================
+// TRATTINI DI A CAPO
+// =============================================================================
+
+/**
+ * Rimuove i trattini di a capo lasciati dalla scrittura a mano: "дотро- нулась" → "дотронулась".
+ * Agisce solo su "lettera + trattino + spazio + lettera", quindi non tocca i trattini
+ * normali ("что-то"), i trattini lunghi con spazi (" - ") né gli elenchi ("- voce").
+ * I blocchi di codice (```) restano intatti.
+ */
+export function removeHyphenBreaks(text: string): string {
+	let inFence = false;
+	return text.split('\n').map(line => {
+		if (/^\s*```/.test(line)) {
+			inFence = !inFence;
+			return line;
+		}
+		return inFence ? line : line.replace(/(\p{L})-[ \t]+(?=\p{L})/gu, '$1');
+	}).join('\n');
+}
+
+// =============================================================================
 // PIPELINE COMPLETA
 // =============================================================================
 
 /**
- * Pipeline completa: [collapse in Continuous mode] → normalizzazione simboli → espansione keyword.
+ * Pipeline completa: [collapse in Continuous mode] → [rimozione trattini di a capo]
+ * → normalizzazione simboli → espansione keyword.
  * Questa è la funzione principale da usare per l'output OCR grezzo.
  */
-export function parseHandwritingToMarkdown(rawOcrText: string, continuousMode = false): string {
-	const preprocessed = continuousMode ? collapseContinuousLines(rawOcrText) : rawOcrText;
+export function parseHandwritingToMarkdown(rawOcrText: string, continuousMode = false, joinHyphenBreaks = false): string {
+	const collapsed = continuousMode ? collapseContinuousLines(rawOcrText) : rawOcrText;
+	const preprocessed = joinHyphenBreaks ? removeHyphenBreaks(collapsed) : collapsed;
 	return expandKeywords(normalizeMarkdownSymbols(preprocessed));
 }
 
