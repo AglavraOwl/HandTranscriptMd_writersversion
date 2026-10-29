@@ -5,7 +5,7 @@
    handwriting Android.
    ============================================= */
 
-import { ItemView, WorkspaceLeaf, TFile, Notice, Platform, Modal, App, MarkdownView, setIcon, ViewStateResult } from 'obsidian';
+import { ItemView, View, WorkspaceLeaf, TFile, Notice, Platform, Modal, App, MarkdownView, setIcon, ViewStateResult } from 'obsidian';
 import type HandwritingPlugin from './main';
 import { DrawingCanvas, Stroke } from './drawing-canvas';
 import { strokesToSvg, parseSvgStrokes, svgToBase64Png, archiveSvgFile, ensureFolderExists } from './svg-utils';
@@ -44,12 +44,37 @@ export function preserveFocusAcrossModify(plugin: HandwritingPlugin, srcPath: st
 	const ws = plugin.app.workspace;
 	let focusDone = false;
 
+	// Opzione "non passare alla nota": invece di portare il focus sulla nota
+	// convertita, rimette il focus dove l'utente si trova ORA (tipicamente
+	// mentre scrive la nota successiva), così la conversione in background
+	// non interrompe la scrittura.
+	const keepLeaf = plugin.settings.stayOnCurrentNote
+		? ws.getActiveViewOfType(View)?.leaf ?? null
+		: null;
+
+	const restoreCurrentLeaf = () => {
+		if (!keepLeaf) return;
+		// Se la tab è stata chiusa nel frattempo (es. editor che si chiude da solo
+		// dopo la conversione) lascia scegliere a Obsidian.
+		let stillOpen = false;
+		ws.iterateAllLeaves(l => { if (l === keepLeaf) stillOpen = true; });
+		if (!stillOpen) return;
+		if (ws.getActiveViewOfType(View)?.leaf !== keepLeaf) ws.setActiveLeaf(keepLeaf, { focus: true });
+		// Il re-render CM6 può togliere il focus al cursore anche senza cambiare tab
+		const view = keepLeaf.view;
+		if (view instanceof MarkdownView) {
+			const cm = view.contentEl.querySelector<HTMLElement>('.cm-content');
+			if (cm && !cm.contains(activeDocument.activeElement)) cm.focus();
+		}
+	};
+
 	const doFocus = () => {
 		if (focusDone) return;
 		focusDone = true;
 		// Aspetta che il re-render CM6 innescato da vault.modify sia completo
 		// prima di rimettere il focus, altrimenti il click/focus si perde.
 		window.setTimeout(() => {
+			if (plugin.settings.stayOnCurrentNote) { restoreCurrentLeaf(); return; }
 			let mdView = ws.getActiveViewOfType(MarkdownView);
 			if (!mdView || mdView.file?.path !== srcPath) {
 				const leaf = ws.getLeavesOfType('markdown')
@@ -72,6 +97,15 @@ export function preserveFocusAcrossModify(plugin: HandwritingPlugin, srcPath: st
 
 	// Fallback: se vault.modify non spara entro 3s (caso anomalo), forza comunque il focus.
 	window.setTimeout(() => { plugin.app.vault.offref(ref); doFocus(); }, 3000);
+}
+
+// Notifica di fine conversione. Con l'opzione "resta sulla nota corrente" attiva
+// dice anche in quale nota è finito il testo, dato che l'utente non ci è stato portato.
+export function noticeConverted(plugin: HandwritingPlugin, srcPath: string): void {
+	if (!plugin.settings.stayOnCurrentNote) { new Notice(t('notice_converted')); return; }
+	const file = plugin.app.vault.getAbstractFileByPath(srcPath);
+	const name = file instanceof TFile ? file.basename : srcPath;
+	new Notice(t('notice_converted_to').replace('{name}', name));
 }
 
 // Applica una sostituzione sul file .md.
@@ -488,7 +522,7 @@ export class DrawingEditorView extends ItemView {
 			overlay.remove();
 			this.canvas.destroy(); this.canvas = null;
 			this.leaf.detach();
-			new Notice(t('notice_converted'));
+			noticeConverted(this.plugin, this.sourcePath);
 		} catch (e: unknown) {
 			// Errore: sostituisce lo spinner con messaggio + OK
 			overlay.empty();
@@ -647,7 +681,7 @@ export class DrawingModal extends Modal {
 			overlay.remove();
 			this.canvas.destroy(); this.canvas = null;
 			this.close();
-			new Notice(t('notice_converted'));
+			noticeConverted(this.plugin, this.sourcePath);
 		} catch (e: unknown) {
 			// Errore: sostituisce lo spinner con messaggio + OK
 			overlay.empty();

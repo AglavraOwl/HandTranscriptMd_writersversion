@@ -208,6 +208,7 @@ Open **Settings → Handwriting to Markdown** to configure:
 | **OCR languages** | Comma-separated BCP-47 codes (e.g. `it, en, fr`). Tells Gemini which languages to expect. |
 | **Custom wordlist** | On by default. See [Custom Wordlist](#custom-wordlist-proper-nouns--invented-words) below. |
 | **Remove line-break hyphens** | Off by default. Joins words split across lines by a hyphen (`hand- writing` → `handwriting`). Only *letter, hyphen, space, letter* is joined, so ordinary hyphens like `well-known` are untouched. |
+| **Stay on current note after conversion** | Off by default. When a conversion finishes, you are not switched to the note that received the text; a notification says which note it was added to. Useful when conversion is slow and you are already writing the next handwritten note. |
 
 > **Note — Free API key limitations:** With the free tier of Google AI Studio, your data may be used by Google to improve their models. Additionally, under high traffic you may see a **"Too many requests — please try again later"** error. To avoid rate limits, enable billing on [Google AI Studio](https://aistudio.google.com); costs are minimal for occasional OCR use.
 

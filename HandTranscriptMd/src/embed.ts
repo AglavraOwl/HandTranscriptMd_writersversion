@@ -26,7 +26,7 @@ import { getEffectiveBgColor, getEffectiveLineColor, remapStrokeColor, BgMode, r
 import { getRecognizer } from './recognizer';
 import { collectWordlist } from './wordlist';
 import { parseHandwritingToMarkdown } from './md-parser';
-import { VIEW_TYPE_HANDWRITING, DrawingEditorView, DrawingModal, preserveFocusAcrossModify } from './editor-view';
+import { VIEW_TYPE_HANDWRITING, DrawingEditorView, DrawingModal, preserveFocusAcrossModify, noticeConverted } from './editor-view';
 
 // Dati JSON salvati dentro il code block ```handwriting (formato legacy)
 interface EmbedData {
@@ -404,7 +404,7 @@ async function doConvertWiki(
 	const markdown = await runOcrPipeline(svgContent, plugin, sourcePath);
 	await archiveSvgFile(svgPath, plugin);
 	await replaceWikiEmbedWithMarkdown(svgPath, markdown, sourcePath, plugin);
-	new Notice(t('notice_converted'));
+	noticeConverted(plugin, sourcePath);
 }
 
 /* =============================================
@@ -421,7 +421,7 @@ async function doConvert(
 		const markdown = await runOcrPipeline(svgContent, plugin, ctx.sourcePath);
 		await archiveSvgFile(data.svg, plugin);
 		await replaceEmbedWithMarkdown(ctx, data, markdown, plugin);
-		new Notice(t('notice_converted'));
+		noticeConverted(plugin, ctx.sourcePath);
 	} catch (e: unknown) {
 		new Notice(t('error_ocr') + (e instanceof Error ? e.message : String(e)));
 	}

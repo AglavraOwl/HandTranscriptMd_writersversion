@@ -26,6 +26,7 @@ export interface HandwritingSettings {
 	openrouterModel: string;      // id del modello OpenRouter selezionato (es. 'google/gemini-2.5-flash')
 	useCustomWordlist: boolean;   // usa handwriting-words.md (cascading dalla nota alla radice) come suggerimento OCR
 	removeHyphenBreaks: boolean;  // unisce le parole spezzate a fine riga ("дотро- нулась" → "дотронулась")
+	stayOnCurrentNote: boolean;   // a conversione finita non porta il focus sulla nota convertita: mostra solo una notifica
 	debugMode: boolean;           // mostra Notice di debug per eventi IME/touch
 	uiLanguage: string;           // lingua dell'interfaccia impostazioni ('auto' = segue sistema)
 	continuousMode: boolean;      // unisce tutte le righe in un unico paragrafo, //Z per andare a capo
@@ -105,6 +106,7 @@ export const DEFAULT_SETTINGS: HandwritingSettings = {
 	openrouterModel: '',
 	useCustomWordlist: true,
 	removeHyphenBreaks: false,    // default: testo OCR invariato
+	stayOnCurrentNote: false,     // default: comportamento attuale (focus sulla nota convertita)
 	debugMode: false,
 	uiLanguage: 'auto',           // default: segue la lingua di sistema di Obsidian
 	continuousMode: false,
@@ -355,6 +357,17 @@ export class HandwritingSettingTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.removeHyphenBreaks)
 				.onChange(async (value) => {
 					this.plugin.settings.removeHyphenBreaks = value;
+					await this.plugin.saveSettings();
+				}));
+
+		// --- Resta sulla nota corrente a conversione finita ---
+		new Setting(containerEl)
+			.setName(t('stay_on_note_name'))
+			.setDesc(t('stay_on_note_desc'))
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.stayOnCurrentNote)
+				.onChange(async (value) => {
+					this.plugin.settings.stayOnCurrentNote = value;
 					await this.plugin.saveSettings();
 				}));
 
