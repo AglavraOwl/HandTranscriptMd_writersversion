@@ -5,6 +5,7 @@
 import { App, PluginSettingTab, Setting, Notice } from 'obsidian';
 import type HandwritingPlugin from './main';
 import { t, setLocale, availableLocales, localeNames } from './i18n';
+import { DEFAULT_LINE_SPACING, MIN_LINE_SPACING, MAX_LINE_SPACING, clampLineSpacing } from './drawing-canvas';
 import { fetchOpenRouterModels, testGeminiConnection, testOpenRouterConnection, OpenRouterModelSuggestModal } from './openrouter';
 
 // Modalità sfondo: chiaro, scuro o automatico (segue il tema di Obsidian)
@@ -18,6 +19,7 @@ export interface HandwritingSettings {
 	organizeByNote: boolean;      // se true, rispecchia il percorso della nota come sottocartella sotto svgFolder
 	canvasWidth: number;          // larghezza interna del canvas (px)
 	canvasHeight: number;         // altezza interna del canvas (px)
+	lineSpacing: number;          // distanza tra le righe del foglio (px); si applica ai nuovi blocchi
 	bgMode: BgMode;               // modalità sfondo
 	ocrLanguages: string[];       // lingue per il riconoscimento OCR (codici BCP-47, es. 'it', 'en')
 	ocrProvider: OcrProvider;     // provider OCR attivo ('gemini' o 'openrouter')
@@ -98,7 +100,8 @@ export const DEFAULT_SETTINGS: HandwritingSettings = {
 	organizeByNote: false,        // default: comportamento attuale (cartella piatta)
 	canvasWidth: 800,
 	canvasHeight: 300,
-	bgMode: 'auto',               // default: segue automaticamente il tema di Obsidian
+	lineSpacing: DEFAULT_LINE_SPACING,
+	bgMode: 'auto',              // default: segue automaticamente il tema di Obsidian
 	ocrLanguages: ['it', 'en'],   // italiano e inglese di default
 	ocrProvider: 'gemini',        // default: comportamento attuale
 	geminiApiKey: '',
@@ -203,6 +206,27 @@ export class HandwritingSettingTab extends PluginSettingTab {
 						this.plugin.settings.canvasHeight = n;
 						await this.plugin.saveSettings();
 					}
+				}));
+
+		// --- Spaziatura righe ---
+		new Setting(containerEl)
+			.setName(t('line_spacing_name'))
+			.setDesc(t('line_spacing_desc'))
+			.addSlider(slider => slider
+				.setLimits(MIN_LINE_SPACING, MAX_LINE_SPACING, 2)
+				.setValue(clampLineSpacing(this.plugin.settings.lineSpacing))
+				.setDynamicTooltip()
+				.onChange(async (value) => {
+					this.plugin.settings.lineSpacing = value;
+					await this.plugin.saveSettings();
+				}))
+			.addExtraButton(btn => btn
+				.setIcon('reset')
+				.setTooltip(t('line_spacing_reset'))
+				.onClick(async () => {
+					this.plugin.settings.lineSpacing = DEFAULT_LINE_SPACING;
+					await this.plugin.saveSettings();
+					this.display();
 				}));
 
 		// --- Sfondo canvas ---

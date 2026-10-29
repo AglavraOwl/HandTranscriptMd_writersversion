@@ -7,8 +7,8 @@
 
 import { ItemView, View, WorkspaceLeaf, TFile, Notice, Platform, Modal, App, MarkdownView, setIcon, ViewStateResult } from 'obsidian';
 import type HandwritingPlugin from './main';
-import { DrawingCanvas, Stroke } from './drawing-canvas';
-import { strokesToSvg, parseSvgStrokes, svgToBase64Png, archiveSvgFile, ensureFolderExists } from './svg-utils';
+import { DrawingCanvas, Stroke, clampLineSpacing } from './drawing-canvas';
+import { strokesToSvg, parseSvgStrokes, parseSvgLineSpacing, svgToBase64Png, archiveSvgFile, ensureFolderExists } from './svg-utils';
 import { getEffectiveBgColor, getEffectiveLineColor, remapStrokeColor, LIGHT_COLORS, DARK_COLORS, resolveIsDark, BgMode } from './settings';
 import { getRecognizer } from './recognizer';
 import { collectWordlist } from './wordlist';
@@ -132,18 +132,22 @@ async function replaceInMdFile(
 async function loadStrokesFromSvg(
 	svgPath: string,
 	plugin: HandwritingPlugin
-): Promise<{ strokes: Stroke[]; canvasWidth: number | null; canvasHeight: number | null }> {
+): Promise<{ strokes: Stroke[]; canvasWidth: number | null; canvasHeight: number | null; lineSpacing: number }> {
 	const file = plugin.app.vault.getAbstractFileByPath(svgPath);
 	if (file instanceof TFile) {
 		const content = await plugin.app.vault.read(file);
 		const m = content.match(/viewBox="0 0 (\d+) (\d+)"/);
+		const strokes = parseSvgStrokes(content);
 		return {
-			strokes: parseSvgStrokes(content),
+			strokes,
 			canvasWidth:  m ? parseInt(m[1] ?? '0') : null,
 			canvasHeight: m ? parseInt(m[2] ?? '0') : null,
+			// Un blocco con scrittura conserva la sua spaziatura (i tratti sono allineati alle righe);
+			// un blocco ancora vuoto prende quella attuale delle impostazioni.
+			lineSpacing: strokes.length > 0 ? parseSvgLineSpacing(content) : clampLineSpacing(plugin.settings.lineSpacing),
 		};
 	}
-	return { strokes: [], canvasWidth: null, canvasHeight: null };
+	return { strokes: [], canvasWidth: null, canvasHeight: null, lineSpacing: clampLineSpacing(plugin.settings.lineSpacing) };
 }
 
 // Salva il contenuto SVG del canvas su disco e aggiorna la preview inline.
@@ -155,7 +159,7 @@ async function saveSvgToDisk(
 ): Promise<void> {
 	const svg = strokesToSvg(
 		canvas.getStrokes(), canvas.getWidth(), canvas.getHeight(),
-		canvas.getBgColor(), canvas.getLineColor()
+		canvas.getBgColor(), canvas.getLineColor(), canvas.getLineSpacing()
 	);
 	const folder = svgPath.substring(0, svgPath.lastIndexOf('/'));
 	if (folder) await ensureFolderExists(folder, plugin);
@@ -289,7 +293,7 @@ async function buildEditorUI(opts: {
 	setIcon(addSectionBtn, 'arrow-down');
 
 	// Carica i tratti dal file SVG
-	const { strokes, canvasWidth: savedW, canvasHeight: savedH } = await loadStrokesFromSvg(opts.svgPath, plugin);
+	const { strokes, canvasWidth: savedW, canvasHeight: savedH, lineSpacing } = await loadStrokesFromSvg(opts.svgPath, plugin);
 	const { canvasWidth, canvasHeight } = plugin.settings;
 	// Usa le dimensioni salvate nel viewBox per preservare i tratti di sessioni precedenti più larghe
 	const w = savedW ?? canvasWidth;
@@ -297,6 +301,7 @@ async function buildEditorUI(opts: {
 	const debugFn = plugin.settings.debugMode ? (msg: string) => new Notice(msg, 3000) : null;
 
 	const canvas = new DrawingCanvas(canvasWrap, w, h, canvasHeight, isMobile, debugFn);
+	canvas.setLineSpacing(lineSpacing);
 	canvas.setBackground(bgColor, lineColor);
 	canvas.setColor(colors[0]!);
 	// Su mobile: dito = scroll manuale del container, penna = disegno
@@ -509,7 +514,7 @@ export class DrawingEditorView extends ItemView {
 		overlay.createDiv({ cls: 'hwm_spinner' });
 		try {
 			const svg = strokesToSvg(this.canvas.getStrokes(), this.canvas.getWidth(),
-				this.canvas.getHeight(), this.canvas.getBgColor(), this.canvas.getLineColor());
+				this.canvas.getHeight(), this.canvas.getBgColor(), this.canvas.getLineColor(), this.canvas.getLineSpacing());
 			const svgEl  = new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement as unknown as SVGElement;
 			const base64 = await svgToBase64Png(svgEl);
 			const wordlist = this.plugin.settings.useCustomWordlist ? await collectWordlist(this.sourcePath, this.plugin) : [];
@@ -668,7 +673,7 @@ export class DrawingModal extends Modal {
 		overlay.createDiv({ cls: 'hwm_spinner' });
 		try {
 			const svg = strokesToSvg(this.canvas.getStrokes(), this.canvas.getWidth(), this.canvas.getHeight(),
-				this.canvas.getBgColor(), this.canvas.getLineColor());
+				this.canvas.getBgColor(), this.canvas.getLineColor(), this.canvas.getLineSpacing());
 			const svgEl  = new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement as unknown as SVGElement;
 			const base64 = await svgToBase64Png(svgEl);
 			const wordlist = this.plugin.settings.useCustomWordlist ? await collectWordlist(this.sourcePath, this.plugin) : [];

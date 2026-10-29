@@ -21,7 +21,7 @@ import {
 import type HandwritingPlugin from './main';
 import { t, type I18nKey } from './i18n';
 import { Stroke } from './drawing-canvas';
-import { strokesToSvg, parseSvgStrokes, generateId, svgToBase64Png, archiveSvgFile, getSvgFolderForNote, ensureFolderExists } from './svg-utils';
+import { strokesToSvg, parseSvgStrokes, parseSvgLineSpacing, generateId, svgToBase64Png, archiveSvgFile, getSvgFolderForNote, ensureFolderExists } from './svg-utils';
 import { getEffectiveBgColor, getEffectiveLineColor, remapStrokeColor, BgMode, resolveIsDark } from './settings';
 import { getRecognizer } from './recognizer';
 import { collectWordlist } from './wordlist';
@@ -66,7 +66,8 @@ export function registerEmbed(plugin: HandwritingPlugin) {
 				svgWidth,
 				svgHeight,
 				getEffectiveBgColor(plugin.settings),
-				getEffectiveLineColor(plugin.settings)
+				getEffectiveLineColor(plugin.settings),
+				parseSvgLineSpacing(content)  // il cambio tema non deve alterare la spaziatura del blocco
 			);
 			await plugin.app.vault.modify(file, newSvg);
 			// Aggiorna l'<img> nella preview inline con cache-bust
@@ -571,7 +572,7 @@ export async function insertHandwritingBlock(plugin: HandwritingPlugin) {
 	// non trova nulla da decorare e i bottoni non appaiono.
 	const bgColor = getEffectiveBgColor(plugin.settings);
 	const lineColor = getEffectiveLineColor(plugin.settings);
-	const emptySvg = strokesToSvg([], plugin.settings.canvasWidth, plugin.settings.canvasHeight, bgColor, lineColor);
+	const emptySvg = strokesToSvg([], plugin.settings.canvasWidth, plugin.settings.canvasHeight, bgColor, lineColor, plugin.settings.lineSpacing);
 
 	await ensureFolderExists(folder, plugin);
 	await plugin.app.vault.create(svgPath, emptySvg);

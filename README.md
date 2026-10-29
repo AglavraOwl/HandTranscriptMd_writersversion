@@ -64,7 +64,7 @@ The editor opens differently depending on your platform:
 
 - **Stylus draws, finger scrolls** — on Android, a finger touch scrolls the canvas; the stylus draws. No conflict.
 - **Canvas auto-expands** — as you draw near the bottom edge, the canvas grows automatically.
-- **Horizontal lines** — the canvas shows ruled lines (like a notebook) as a visual guide; they appear in the saved SVG too.
+- **Horizontal lines** — the canvas shows ruled lines (like a notebook) as a visual guide; they appear in the saved SVG too. Their spacing is adjustable in the settings.
 - **Colors adapt to theme** — strokes drawn in black on a light theme are automatically remapped to white when you switch to dark theme (and vice versa).
 
 ---
@@ -203,6 +203,7 @@ Open **Settings → Handwriting to Markdown** to configure:
 | **Interface language** | Language for the settings UI. "Auto" follows Obsidian's language. |
 | **SVG folder** | Vault subfolder where SVG drawing files are saved (default: `_handwriting`) |
 | **Canvas width / height** | Default canvas resolution in pixels |
+| **Line spacing** | Distance between the ruled lines, 20–48 px (default 32). Tighter lines fit more rows on screen, handy on a phone. Applies to new and still-empty blocks; a block that already contains writing keeps the spacing it was written with. |
 | **Canvas background** | Light / Dark / Auto (follows Obsidian theme) |
 | **Gemini API key** | Required for OCR. Get it free at [aistudio.google.com](https://aistudio.google.com). |
 | **OCR languages** | Comma-separated BCP-47 codes (e.g. `it, en, fr`). Tells Gemini which languages to expect. |

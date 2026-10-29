@@ -7,7 +7,7 @@
 
 import { TFile } from 'obsidian';
 import type HandwritingPlugin from './main';
-import { Point, Stroke, LINE_SPACING } from './drawing-canvas';
+import { Point, Stroke, DEFAULT_LINE_SPACING, clampLineSpacing } from './drawing-canvas';
 
 // Crea `path` e tutte le cartelle padre mancanti (vault.createFolder può
 // fallire su percorsi annidati multi-livello se i padri non esistono ancora,
@@ -97,13 +97,24 @@ function r(n: number): string {
 	return Math.round(n * 10) / 10 + '';
 }
 
+// Legge la spaziatura righe salvata nell'SVG (attributo data-hwm-line-spacing).
+// Gli SVG creati prima dell'opzione non ce l'hanno: avevano sempre il valore di default.
+export function parseSvgLineSpacing(svgContent: string): number {
+	const m = svgContent.match(/data-hwm-line-spacing="(\d+(?:\.\d+)?)"/);
+	return m ? clampLineSpacing(parseFloat(m[1]!)) : DEFAULT_LINE_SPACING;
+}
+
 // Converte array di Stroke in contenuto SVG completo
 // I dati grezzi dei tratti sono dentro <desc> come JSON
-// per permettere il riedit senza perdere informazioni
+// per permettere il riedit senza perdere informazioni.
+// La spaziatura righe viene salvata nell'SVG, così ogni nota la conserva anche
+// se l'impostazione cambia in seguito.
 export function strokesToSvg(
 	strokes: Stroke[], width: number, height: number,
-	bgColor = '#ffffff', lineColor = '#e0e0e0'
+	bgColor = '#ffffff', lineColor = '#e0e0e0',
+	lineSpacing = DEFAULT_LINE_SPACING
 ): string {
+	const spacing = clampLineSpacing(lineSpacing);
 	const paths: string[] = [];
 
 	for (const stroke of strokes) {
@@ -119,12 +130,12 @@ export function strokesToSvg(
 
 	// Righe orizzontali (foglio a righe) — stessa spaziatura del canvas
 	const lines: string[] = [];
-	for (let y = LINE_SPACING; y < height; y += LINE_SPACING) {
+	for (let y = spacing; y < height; y += spacing) {
 		lines.push(`  <line x1="0" y1="${y}" x2="${width}" y2="${y}" stroke="${lineColor}" stroke-width="0.5"/>`);
 	}
 
 	return [
-		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">`,
+		`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" data-hwm-line-spacing="${spacing}">`,
 		`  <rect width="100%" height="100%" fill="${bgColor}"/>`,
 		...lines,
 		`  <desc class="hwm-strokes">${escapeXml(strokesJson)}</desc>`,
@@ -178,6 +189,12 @@ function unescapeXml(s: string): string {
 
 // Converte un SVGElement in PNG base64 via canvas HTML temporaneo.
 // Usato dalla pipeline OCR (embed.ts e editor-view.ts) prima di inviare a Gemini.
+// L'immagine per l'OCR viene disegnata al doppio della dimensione dell'SVG (i tratti sono
+// vettoriali, quindi nessuna perdita): la scrittura piccola, con righe ravvicinate, resta
+// leggibile. Il lato più lungo non supera MAX_OCR_SIDE per non produrre PNG enormi.
+const OCR_SCALE = 2;
+const MAX_OCR_SIDE = 4096;
+
 export function svgToBase64Png(svgElement: SVGElement): Promise<string> {
 	return new Promise((resolve, reject) => {
 		const cvs = activeDocument.createElement('canvas');
@@ -189,8 +206,9 @@ export function svgToBase64Png(svgElement: SVGElement): Promise<string> {
 		);
 		const url = URL.createObjectURL(blob);
 		img.onload = () => {
-			cvs.width = img.width; cvs.height = img.height;
-			ctx.drawImage(img, 0, 0);
+			const scale = Math.max(1, Math.min(OCR_SCALE, MAX_OCR_SIDE / Math.max(img.width, img.height, 1)));
+			cvs.width = Math.round(img.width * scale); cvs.height = Math.round(img.height * scale);
+			ctx.drawImage(img, 0, 0, cvs.width, cvs.height);
 			URL.revokeObjectURL(url);
 			resolve(cvs.toDataURL('image/png').split(',')[1]!);
 		};

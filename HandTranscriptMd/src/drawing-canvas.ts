@@ -20,8 +20,17 @@ export interface Stroke {
 
 export type DrawMode = 'pen' | 'eraser';
 
-// Spaziatura righe orizzontali — costante condivisa con svg-utils.ts
-export const LINE_SPACING = 32;
+// Spaziatura righe orizzontali: valore di default (anche per gli SVG vecchi che non
+// salvano la spaziatura) e limiti dell'impostazione. Condivisi con svg-utils.ts e settings.ts.
+export const DEFAULT_LINE_SPACING = 32;
+export const MIN_LINE_SPACING = 20;
+export const MAX_LINE_SPACING = 48;
+
+// Riporta una spaziatura qualsiasi (impostazioni modificate a mano, SVG corrotti) nei limiti
+export function clampLineSpacing(n: number): number {
+	if (!Number.isFinite(n)) return DEFAULT_LINE_SPACING;
+	return Math.min(MAX_LINE_SPACING, Math.max(MIN_LINE_SPACING, Math.round(n)));
+}
 
 // Deep copy di un array di Stroke
 function cloneStrokes(strokes: Stroke[]): Stroke[] {
@@ -57,8 +66,8 @@ export class DrawingCanvas {
 	// Altezza di default delle settings (usata per reset su clear)
 	private defaultHeight: number;
 
-	// Righe e sfondo — usa la costante esportata del modulo
-	readonly LINE_SPACING = LINE_SPACING;
+	// Righe e sfondo
+	private lineSpacing = DEFAULT_LINE_SPACING;
 	private bgColor = '#ffffff';
 	private lineColor = '#e0e0e0';
 
@@ -228,6 +237,12 @@ export class DrawingCanvas {
 		this.lineColor = lineColor;
 		this.redraw();
 	}
+	// Distanza tra le righe (px mondo). Va impostata prima di caricare i tratti.
+	setLineSpacing(spacing: number) {
+		this.lineSpacing = clampLineSpacing(spacing);
+		this.redraw();
+	}
+	getLineSpacing(): number { return this.lineSpacing; }
 	getBgColor(): string { return this.bgColor; }
 	getLineColor(): string { return this.lineColor; }
 
@@ -520,7 +535,7 @@ export class DrawingCanvas {
 
 		this.ctx.strokeStyle = this.lineColor;
 		this.ctx.lineWidth = 0.5;
-		for (let y = this.LINE_SPACING; y < h; y += this.LINE_SPACING) {
+		for (let y = this.lineSpacing; y < h; y += this.lineSpacing) {
 			this.ctx.beginPath();
 			this.ctx.moveTo(0, y);
 			this.ctx.lineTo(w, y);
